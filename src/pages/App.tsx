@@ -1,10 +1,38 @@
 import React from "react";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import Cookies from 'js-cookie';
+import Login from './Login/Login';
+import Admin from './Admin/Admin';
+import ResponsiveProvider from "../components/ResponsiveProvider";
+
+interface PrivateRouteProps {
+  children: React.ReactNode;
+  redirectTo: string;
+}
+
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, redirectTo }) => {
+  const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+  const isAuthenticated = !!(Cookies.get(cookieName ? cookieName : ''));
+  return isAuthenticated ? <>{children}</> : <Navigate to={redirectTo} />;
+}
 
 function App() {
   return (
-    <>
-      <h2>App</h2>
-    </>
+    <BrowserRouter>
+      <ResponsiveProvider>
+        <Routes>
+          <Route 
+            path='/admin' element={
+              <PrivateRoute redirectTo="/login">
+                <Admin />
+              </PrivateRoute>
+            } 
+          />
+          <Route path='/login' element={<Login />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </ResponsiveProvider>
+    </BrowserRouter>
   );
 }
 
