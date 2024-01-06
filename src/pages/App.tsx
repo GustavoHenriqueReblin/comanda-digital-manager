@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import Login from './Login/Login';
 import Admin from './Admin/Admin';
 import ResponsiveProvider from "../components/ResponsiveProvider";
+import Header from "../components/Header/Header";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ function App() {
   return (
     <BrowserRouter>
       <ResponsiveProvider>
+        <Header />
         <Routes>
           <Route 
             path='/admin' element={

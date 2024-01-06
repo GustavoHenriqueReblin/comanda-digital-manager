@@ -76,7 +76,7 @@ function Login() {
             className='input'
             type="text"
             aria-label="user input"
-            placeholder="seu-email@valido.com.br"
+            placeholder="Seu-email@valido.com.br"
             {...register('user')}
           />
           {errors.user && <span className='error-input'>{errors.user.message}</span>}
@@ -85,7 +85,7 @@ function Login() {
             className='input'
             type="password"
             aria-label="password input"
-            placeholder="sua senha"
+            placeholder="Sua senha"
             {...register('password')}
           />
           {errors.password && <span className='error-input'>{errors.password.message}</span>}
