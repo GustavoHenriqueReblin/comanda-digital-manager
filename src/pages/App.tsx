@@ -1,10 +1,12 @@
-import React from "react";
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import Cookies from 'js-cookie';
 import Login from './Login/Login';
 import Admin from './Admin/Admin';
+import Bartender from './Bartender/BartenderAuth';
 import ResponsiveProvider from "../components/ResponsiveProvider";
 import Header from "../components/Header/Header";
+
+import React from "react";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -31,6 +33,7 @@ function App() {
             } 
           />
           <Route path='/login' element={<Login />} />
+          <Route path='/' element={<Bartender />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </ResponsiveProvider>
