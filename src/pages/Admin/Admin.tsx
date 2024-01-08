@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import './admin.scss';
 
 import { useLazyQuery, useSubscription } from "@apollo/client";
-import { BARTENDER_AUTH, GetBartenderIsWaiting } from "../../graphql/queries/bartenderQueries";
+import { BARTENDER_AUTH_REQUEST, GetBartenderIsWaiting } from "../../graphql/queries/bartenderQueries";
 
 function Admin() {
     const [showApprovalCard, setShowApprovalCard] = useState(false);
     const [getBartenderIsWaiting, { data: bartenderIsWaitingData }] = useLazyQuery(GetBartenderIsWaiting);
-    const { data: authRequestData } = useSubscription(BARTENDER_AUTH);
+    const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
 
     const cardTemp = (bartender: any) => {
         return (

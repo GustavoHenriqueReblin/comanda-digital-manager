@@ -30,7 +30,22 @@ export const GetBartenderIsWaiting = gql`
   }
 `;
 
-export const BARTENDER_AUTH = gql`
+export const UPDATE_BARTENDER = gql`
+  mutation UpdateBartender($input: UpdateBartenderInput!) {
+    updateBartender(input: $input) {
+      data {
+        id
+        name
+        securityCode
+        token
+        isWaiting
+      }
+      message
+    }
+  }
+`;
+
+export const BARTENDER_AUTH_REQUEST = gql`
   subscription {
     authBartenderRequest {
       id
