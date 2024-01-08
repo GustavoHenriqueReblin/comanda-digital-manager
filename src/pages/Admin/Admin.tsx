@@ -1,22 +1,33 @@
 import React, { useEffect, useState } from "react";
 import './admin.scss';
 
-import { useLazyQuery, useSubscription } from "@apollo/client";
-import { BARTENDER_AUTH_REQUEST, GetBartenderIsWaiting } from "../../graphql/queries/bartenderQueries";
+import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
+import { BARTENDER_AUTH_REQUEST, GetBartenderIsWaiting, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
+import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
+import Cookies from "js-cookie";
 
 function Admin() {
     const [showApprovalCard, setShowApprovalCard] = useState(false);
     const [getBartenderIsWaiting, { data: bartenderIsWaitingData }] = useLazyQuery(GetBartenderIsWaiting);
     const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
+    const [updateBartender] = useMutation(UPDATE_BARTENDER);
 
-    const cardTemp = (bartender: any) => {
-        return (
-            <div className="card" key={bartender.id}>
-                <p>{bartender.name}</p>
-                <p>{bartender.securityCode}</p>
-            </div>
-        );
-    }
+    const sendResponseAuthReq = (bartender: any, approved: boolean) => {
+        updateBartender({ variables: {
+            input: {
+                id: bartender.id, 
+                isWaiting: false,
+                isApproved: approved,
+                token: bartender.token
+            },
+        }, });
+        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
+        if (cookieName) {
+            Cookies.remove(cookieName);
+        }
+        setShowApprovalCard(false);
+        getBartenderIsWaiting();
+    };
 
     useEffect(() => {
         if (authRequestData) {
@@ -25,28 +36,28 @@ function Admin() {
     }, [authRequestData]);
 
     useEffect(() => {
-        if (bartenderIsWaitingData) {
-            setShowApprovalCard(true);
-        } else {
-            getBartenderIsWaiting();
-        }
+        bartenderIsWaitingData ? setShowApprovalCard(true) : getBartenderIsWaiting();
     }, [bartenderIsWaitingData, getBartenderIsWaiting]);
 
     return (
         <>
-            { showApprovalCard 
-                ? (
-                    <div className="card-container">
-                        {bartenderIsWaitingData?.bartendersIsWaiting?.map((bartender: any) => (
-                            cardTemp(bartender.data)
-                        ))}
-                        {authRequestData?.authBartenderRequest &&
-                            cardTemp(authRequestData?.authBartenderRequest)
-                        }
-                    </div>
-                ) 
-                : (<h1>Admin</h1>)
-            }
+            <div className="card-container">
+                {bartenderIsWaitingData?.bartendersIsWaiting?.map((bartender: any) => (
+                    <BartenderAuthCard
+                        key={bartender.data.id}
+                        bartender={bartender.data}
+                        isVisible={showApprovalCard}
+                        sendResponseAuthReq={sendResponseAuthReq}
+                    />
+                ))}
+                {authRequestData?.authBartenderRequest && (
+                    <BartenderAuthCard
+                        bartender={authRequestData.authBartenderRequest}
+                        isVisible={showApprovalCard}
+                        sendResponseAuthReq={sendResponseAuthReq}
+                    />
+                )}
+            </div>
         </>
     );
   }

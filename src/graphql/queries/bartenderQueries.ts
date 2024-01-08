@@ -5,9 +5,10 @@ export const GetBartender = gql`
     bartender(input: $input) {
       data {
         id
-        isWaiting
         name
         securityCode
+        isWaiting
+        isApproved
         token
       }
       message
@@ -20,9 +21,10 @@ export const GetBartenderIsWaiting = gql`
     bartendersIsWaiting {
       data {
         id
-        isWaiting
         name
         securityCode
+        isWaiting
+        isApproved
         token
       }
       message
@@ -37,8 +39,9 @@ export const UPDATE_BARTENDER = gql`
         id
         name
         securityCode
-        token
         isWaiting
+        isApproved
+        token
       }
       message
     }
@@ -49,10 +52,24 @@ export const BARTENDER_AUTH_REQUEST = gql`
   subscription {
     authBartenderRequest {
       id
-      securityCode
       name
-      token
+      securityCode
       isWaiting
+      isApproved
+      token
+    }
+  }
+`;
+
+export const BARTENDER_AUTH_RESPONSE = gql`
+  subscription {
+    authBartenderResponse {
+      id
+      isApproved
+      isWaiting
+      name
+      securityCode
+      token
     }
   }
 `;
