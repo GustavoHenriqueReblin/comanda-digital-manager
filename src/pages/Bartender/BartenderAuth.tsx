@@ -6,8 +6,8 @@ import './bartenderAuth.scss';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLazyQuery } from "@apollo/client";
-import { GetBartender } from '../../graphql/queries/bartenderQueries';
+import { useLazyQuery, useSubscription } from "@apollo/client";
+import { GetBartender, MESSAGE_ADDED } from '../../graphql/queries/bartenderQueries';
 import Loading from "../../components/Loading";
 
 interface BartenderFormData {
@@ -24,6 +24,17 @@ function BartenderAuth() {
     const { register, handleSubmit, formState: { errors } } = useForm<BartenderFormData>({
         resolver: zodResolver(bartenderFormSchema),
     });
+
+    const { data, error } = useSubscription(MESSAGE_ADDED);
+    useEffect(() => {
+        const fetch = async () => {
+            console.log('Data:', data);
+            console.log('Error:', error);
+        }
+        if (data) {
+            fetch();
+        }
+    }, [data, error]);
 
     useEffect(() => {
         if (bartenderData && bartenderData.bartender != null) {

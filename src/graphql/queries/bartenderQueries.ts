@@ -10,3 +10,9 @@ export const GetBartender = gql`
     }
   }
 `;
+
+export const MESSAGE_ADDED = gql`
+  subscription {
+    messageAdded
+  }
+`;
