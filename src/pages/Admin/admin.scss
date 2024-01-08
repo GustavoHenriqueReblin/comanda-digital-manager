@@ -1,0 +1,15 @@
+.card-container {
+    height: 90%;
+    width: 280px;
+    padding: 10px;
+    position: absolute;
+    right: calc(50% - 140px);
+    top: 40px;
+
+    .card {
+        height: 90px;
+        width: auto;
+        margin: 10px 0;
+        background-color: aquamarine;
+    }
+}

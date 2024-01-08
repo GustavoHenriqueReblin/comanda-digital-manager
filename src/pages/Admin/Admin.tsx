@@ -1,24 +1,52 @@
-import { useSubscription } from "@apollo/client";
-import React, { useEffect } from "react";
-import { MESSAGE_ADDED } from "../../graphql/queries/bartenderQueries";
+import React, { useEffect, useState } from "react";
+import './admin.scss';
+
+import { useLazyQuery, useSubscription } from "@apollo/client";
+import { BARTENDER_AUTH, GetBartenderIsWaiting } from "../../graphql/queries/bartenderQueries";
 
 function Admin() {
-    const { data, error } = useSubscription(MESSAGE_ADDED);
+    const [showApprovalCard, setShowApprovalCard] = useState(false);
+    const [getBartenderIsWaiting, { data: bartenderIsWaitingData }] = useLazyQuery(GetBartenderIsWaiting);
+    const { data: authRequestData } = useSubscription(BARTENDER_AUTH);
+
+    const cardTemp = (bartender: any) => {
+        return (
+            <div className="card" key={bartender.id}>
+                <p>{bartender.name}</p>
+                <p>{bartender.securityCode}</p>
+            </div>
+        );
+    }
+
     useEffect(() => {
-        const fetch = async () => {
-            console.log('Data:', data);
-            console.log('Error:', error);
+        if (authRequestData) {
+            setShowApprovalCard(true);
+        }  
+    }, [authRequestData]);
+
+    useEffect(() => {
+        if (bartenderIsWaitingData) {
+            setShowApprovalCard(true);
+        } else {
+            getBartenderIsWaiting();
         }
-        if (data) {
-            fetch();
-        }
-    }, [data, error]);
+    }, [bartenderIsWaitingData, getBartenderIsWaiting]);
 
     return (
         <>
-            <h1>
-                Admin
-            </h1>
+            { showApprovalCard 
+                ? (
+                    <div className="card-container">
+                        {bartenderIsWaitingData?.bartendersIsWaiting?.map((bartender: any) => (
+                            cardTemp(bartender.data)
+                        ))}
+                        {authRequestData?.authBartenderRequest &&
+                            cardTemp(authRequestData?.authBartenderRequest)
+                        }
+                    </div>
+                ) 
+                : (<h1>Admin</h1>)
+            }
         </>
     );
   }

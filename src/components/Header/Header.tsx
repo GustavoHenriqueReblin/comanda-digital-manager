@@ -16,8 +16,8 @@ function Header() {
     return (
         <>
             <div className="header">
-                <div onClick={() => redirectTo(TypeRedirect.ROOT)} className="logo">
-                    <span className="title">Carlota’s Kuchen Haus
+                <div className="logo">
+                    <span onClick={() => redirectTo(TypeRedirect.ROOT)} className="title">Carlota’s Kuchen Haus
                         <div className="line"></div>
                     </span>
                 </div>

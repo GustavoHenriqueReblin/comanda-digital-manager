@@ -3,14 +3,16 @@ import React, { useEffect, useState } from "react";
 import '../Login/login.scss';
 import './bartenderAuth.scss';
 
+import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLazyQuery, useSubscription } from "@apollo/client";
-import { GetBartender, MESSAGE_ADDED } from '../../graphql/queries/bartenderQueries';
 import Loading from "../../components/Loading";
+import { useLazyQuery } from "@apollo/client";
+import { GetBartender } from "../../graphql/queries/bartenderQueries";
 
 interface BartenderFormData {
+    isWaitingAprove: boolean;
     securityCode: string;
 };
 
@@ -20,27 +22,43 @@ const bartenderFormSchema = z.object({
 
 function BartenderAuth() {
     const [loading, setLoading] = useState(true);
+    const [isInputBlocked, setIsInputBlocked] = useState(false);
+    const [resMessage, setResMessage] = useState('');
+    const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState<BartenderFormData | null>(null);
     const [getBartender, { data: bartenderData }] = useLazyQuery(GetBartender);
-    const { register, handleSubmit, formState: { errors } } = useForm<BartenderFormData>({
+    const { register, setValue: setSecurityCodeValue, handleSubmit, formState: { errors } } = useForm<BartenderFormData>({
         resolver: zodResolver(bartenderFormSchema),
     });
 
-    const { data, error } = useSubscription(MESSAGE_ADDED);
     useEffect(() => {
-        const fetch = async () => {
-            console.log('Data:', data);
-            console.log('Error:', error);
-        }
-        if (data) {
-            fetch();
-        }
-    }, [data, error]);
+        if (bartenderData && bartenderData.bartender.data !== null) {
+            const data = bartenderData.bartender.data;
 
-    useEffect(() => {
-        if (bartenderData && bartenderData.bartender != null) {
-            // pedir para o backend enviar a solicitação
+            const bartenderDataIsWaiting = {
+                isWaitingAprove: true,
+                id: data.id,
+                securityCode: data.securityCode,
+            };
+            
+            const dateExpires = new Date(new Date().getTime() + (24 * 60 * 60) * 1000); // 1 dia a partir de agora
+            const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
+            if (cookieName) {
+                Cookies.set(cookieName, JSON.stringify(bartenderDataIsWaiting), { secure: true, sameSite: 'strict', expires: dateExpires });
+            }
         }
-    
+
+        if (bartenderData && bartenderData.bartender.message !== null) {
+            setResMessage(bartenderData.bartender.message);
+        }
+
+        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
+        const bartenderDataIsWaiting = Cookies.get(cookieName ? cookieName : '');   
+        setBartenderDataIsWaiting(bartenderDataIsWaiting ? () => {
+            const data = JSON.parse(bartenderDataIsWaiting);
+            setSecurityCodeValue('securityCode', data.securityCode);
+            setIsInputBlocked(true);
+            return data
+        } : null);
         setLoading(false);
     }, [bartenderData]);
 
@@ -62,16 +80,20 @@ function BartenderAuth() {
             ? ( <Loading title="Aguarde, carregando..." /> ) 
             : (
                 <form className="bartender-container" onSubmit={handleSubmit(validateBartenderCode)}>
-                    <label className='label-input'>Senha:</label>
+                    <label className='label-input'>Seu código de segurança:</label>
                     <input
                         className='input'
                         type="text"
                         aria-label="securityCode input"
                         placeholder="Código de garçom"
                         {...register('securityCode')}
+                        disabled={isInputBlocked}
                     />
                     {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
-                    <button className='button' type="submit">Enviar</button>
+                    {resMessage !== '' && <span className='error-input'>{resMessage}</span>}
+                    { bartenderDataIsWaiting
+                    ? (<label className='label-input'>Aguardando aprovação...</label>) 
+                    : (<button className='button' type="submit">Enviar</button>)}
                 </form>
             )}
         </>
