@@ -2,14 +2,15 @@
 import React, { useEffect, useState } from "react";
 import '../Login/login.scss';
 import './bartenderAuth.scss';
+import Loading from "../../components/Loading";
 
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Loading from "../../components/Loading";
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { BARTENDER_AUTH_RESPONSE, GetBartender, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
+import { useNavigate } from 'react-router-dom';
 
 interface BartenderFormData {
     securityCode: string;
@@ -26,10 +27,11 @@ function BartenderAuth() {
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
     const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
-    const [getBartender, { data: bartenderData }] = useLazyQuery(GetBartender);
+    const [getBartender, { data: bartenderData }] = useLazyQuery(GetBartender, {fetchPolicy: 'cache-and-network'});
     const { register, setValue: setSecurityCodeValue, handleSubmit, formState: { errors } } = useForm<BartenderFormData>({
         resolver: zodResolver(bartenderFormSchema),
     });
+    const navigate = useNavigate();
 
     const verifyRequstsInCookie = () => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
@@ -40,30 +42,44 @@ function BartenderAuth() {
             setIsInputBlocked(true);
             return data
         } : null);
-    }
+    };
+
+    const verifyBartenderToken = () => {
+        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+        const bartenderToken = Cookies.get(cookieName ? cookieName : '');   
+        if (bartenderToken) {
+            navigate('/queue');
+        }
+    };
 
     useEffect(() => {
-        console.log("Entrou");
-        
         if (bartenderData && bartenderData.bartender.data !== null) {
             const data = bartenderData.bartender.data;
-            if (!data.isWaiting && !data.isApproved) {
+            const dateExpires = new Date(new Date().getTime() + (24 * 60 * 60) * 1000); // 1 dia a partir de agora
+
+            if (!data.isWaiting && !data.token && !isInputBlocked) {
                 updateBartender({ variables: {
                     input: {
                         id: data.id, 
                         isWaiting: true,
-                        isApproved: false,
                         token: data.token
                     },
                 }, });
-
-                const dateExpires = new Date(new Date().getTime() + (24 * 60 * 60) * 1000); // 1 dia a partir de agora
+            
                 const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
                 if (cookieName) {
                     Cookies.set(cookieName, JSON.stringify(data), { secure: true, sameSite: 'strict', expires: dateExpires });
                 }
+            } else {
+                if (data.token) {
+                    const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+                    if (cookieName) {
+                        Cookies.set(cookieName, JSON.stringify(data.token), { secure: true, sameSite: 'strict', expires: dateExpires });
+                    }
+                }
             }
         }
+        verifyBartenderToken();
         verifyRequstsInCookie();
 
         if (bartenderData && bartenderData.bartender.message !== null) {
@@ -73,10 +89,16 @@ function BartenderAuth() {
         setLoading(false);
     }, [bartenderData]);
 
-    useEffect(() => {
-        // console.log("Dados da resposta da solicitação: ");        
-        // console.log(authResponseData);   
-        setIsInputBlocked(false);     
+    useEffect(() => {     
+        if (authResponseData) {
+            setIsInputBlocked(false);
+            if (authResponseData.authBartenderResponse.isApproved) {
+                navigate('/queue');
+            }else {
+                window.location.reload();
+                console.log("Recusou");
+            }
+        } 
     }, [authResponseData]);
 
     const validateBartenderCode = (data: BartenderFormData) => {

@@ -26,7 +26,6 @@ function Admin() {
             Cookies.remove(cookieName);
         }
         setShowApprovalCard(false);
-        getBartenderIsWaiting();
     };
 
     useEffect(() => {
