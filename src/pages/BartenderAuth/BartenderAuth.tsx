@@ -33,77 +33,86 @@ function BartenderAuth() {
     });
     const navigate = useNavigate();
 
-    const verifyRequstsInCookie = () => {
+    const verifyRequstAuthInCookie = (): boolean => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-        const bartenderDataIsWaiting = Cookies.get(cookieName ? cookieName : '');   
-        setBartenderDataIsWaiting(bartenderDataIsWaiting ? () => {
+        const bartenderDataIsWaiting = Cookies.get(cookieName ? cookieName : ''); 
+        const res = !!bartenderDataIsWaiting;  
+        setBartenderDataIsWaiting(res ? () => {
             const data = JSON.parse(bartenderDataIsWaiting);
             setSecurityCodeValue('securityCode', data.securityCode);
             setIsInputBlocked(true);
             return data
         } : null);
+
+        return res;
     };
 
     const verifyBartenderToken = () => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-        const bartenderToken = Cookies.get(cookieName ? cookieName : '');   
+        const bartenderToken = Cookies.get(cookieName ? cookieName : '');  
         if (bartenderToken) {
             navigate('/queue');
         }
     };
 
-    useEffect(() => {
-        if (bartenderData && bartenderData.bartender.data !== null) {
+    useEffect(() => { 
+       verifyBartenderToken();   
+ 
+        if (bartenderData && bartenderData.bartender.data !== null && bartenderData.bartender.data.id > 0) {
             const data = bartenderData.bartender.data;
-            const dateExpires = new Date(new Date().getTime() + (24 * 60 * 60) * 1000); // 1 dia a partir de agora
-
-            if (!data.isWaiting && !data.token && !isInputBlocked) {
-                updateBartender({ variables: {
-                    input: {
-                        id: data.id, 
-                        isWaiting: true,
-                        token: data.token
-                    },
-                }, });
+            const hasResponse = data.isApproved != null;
             
-                const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-                if (cookieName) {
-                    Cookies.set(cookieName, JSON.stringify(data), { secure: true, sameSite: 'strict', expires: dateExpires });
-                }
-            } else {
-                if (data.token) {
-                    const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+            if (!hasResponse && verifyRequstAuthInCookie()) { // Já enviou a solicitação...
+                setLoading(false);
+                return;
+            }        
+            
+            if (!data.isWaiting) {
+                if (!hasResponse) { // Enviou a solicitação
+                    updateBartender({ variables: {
+                        input: {
+                            id: data.id, 
+                            isWaiting: true,
+                            token: data.token
+                        },
+                    }, });
+
+                    const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
                     if (cookieName) {
-                        Cookies.set(cookieName, JSON.stringify(data.token), { secure: true, sameSite: 'strict', expires: dateExpires });
+                        Cookies.set(cookieName, JSON.stringify(data), { expires: 0.0416667 }); // 1 hora
+                    }
+                    verifyRequstAuthInCookie();
+
+                } else { // Recebeu resposta da solicitação
+                    setIsInputBlocked(false);
+                    const { id } = bartenderDataIsWaiting ? bartenderDataIsWaiting : { id: 0 };
+
+                    if (data.token && Number(id) === Number(data.id) && data.isApproved) { // Aprovou
+                        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+                        if (cookieName) {
+                            Cookies.set(cookieName, JSON.stringify(data.token), { expires: 1 });
+                        }
+                        verifyBartenderToken();
+                    } else { // Recusou
+                        window.location.reload();
                     }
                 }
             }
+        } else {
+            verifyRequstAuthInCookie();
         }
-        verifyBartenderToken();
-        verifyRequstsInCookie();
 
         if (bartenderData && bartenderData.bartender.message !== null) {
             setResMessage(bartenderData.bartender.message);
-        }
+        };
 
         setLoading(false);
-    }, [bartenderData]);
-
-    useEffect(() => {     
-        if (authResponseData) {
-            setIsInputBlocked(false);
-            if (authResponseData.authBartenderResponse.isApproved) {
-                navigate('/queue');
-            }else {
-                window.location.reload();
-                console.log("Recusou");
-            }
-        } 
-    }, [authResponseData]);
+    }, [bartenderData, authResponseData]);
 
     const validateBartenderCode = (data: BartenderFormData) => {
         const { securityCode } = data;
         try {
+            setResMessage('');
             getBartender({
                 variables: { input: { securityCode: securityCode } },
             });

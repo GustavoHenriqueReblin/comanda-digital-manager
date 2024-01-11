@@ -16,9 +16,9 @@ export const GetBartender = gql`
   }
 `;
 
-export const GetBartenderIsWaiting = gql`
-  query GetBartenderIsWaiting {
-    bartendersIsWaiting {
+export const GetBartendersAreWaiting = gql`
+  query GetBartendersAreWaiting {
+    bartendersAreWaiting {
       data {
         id
         name

@@ -34,10 +34,9 @@ function Login() {
   useEffect(() => {
     if (data && data.user != null) {
       const token = data.user.token;
-      const dateExpires = new Date(new Date().getTime() + (24 * 60 * 60) * 1000); // 1 dia a partir de agora
       const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
       if (cookieName) {
-        Cookies.set(cookieName, token, { secure: true, sameSite: 'strict', expires: dateExpires });
+        Cookies.set(cookieName, token, { expires: 1 });
       }
       navigate('/admin');
     }

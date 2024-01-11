@@ -1,14 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import './admin.scss';
 
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
-import { BARTENDER_AUTH_REQUEST, GetBartenderIsWaiting, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
+import { BARTENDER_AUTH_REQUEST, GetBartendersAreWaiting, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
 import Cookies from "js-cookie";
+import Loading from "../../components/Loading";
 
 function Admin() {
-    const [showApprovalCard, setShowApprovalCard] = useState(false);
-    const [getBartenderIsWaiting, { data: bartenderIsWaitingData }] = useLazyQuery(GetBartenderIsWaiting);
+    const [loading, setLoading] = useState(true);
+    const [isVisible, setIsVisible] = useState(true);
+    const [data, setData] = useState<any>();
+    const [getBartendersAreWaiting] = useLazyQuery(GetBartendersAreWaiting);
     const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
 
@@ -23,42 +27,59 @@ function Admin() {
         }, });
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
         if (cookieName) {
+            setIsVisible(false);
             Cookies.remove(cookieName);
         }
-        setShowApprovalCard(false);
     };
 
     useEffect(() => {
-        if (authRequestData) {
-            setShowApprovalCard(true);
-        }  
-    }, [authRequestData]);
+        const fetchBartendersAreWaiting = () => {
+            return new Promise((resolve, reject) => {
+                getBartendersAreWaiting()
+                    .then(res => {
+                        resolve(res.data ? res.data.bartendersAreWaiting.map((item: any) => item.data) : null);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        };
+    
+        authRequestData
+            ? setData(authRequestData.authBartenderRequest)
+            : fetchBartendersAreWaiting()
+                .then(data => {
+                    setData(data);
+                    setLoading(false);
+                })
+                .catch(error => {
+                    console.error("Erro ao buscar dados:", error);
+                });
 
-    useEffect(() => {
-        bartenderIsWaitingData ? setShowApprovalCard(true) : getBartenderIsWaiting();
-    }, [bartenderIsWaitingData, getBartenderIsWaiting]);
+        setIsVisible(true);
+    }, [authRequestData]);
 
     return (
         <>
-            <div className="card-container">
-                {bartenderIsWaitingData?.bartendersIsWaiting?.map((bartender: any) => (
-                    <BartenderAuthCard
-                        key={bartender.data.id}
-                        bartender={bartender.data}
-                        isVisible={showApprovalCard}
-                        sendResponseAuthReq={sendResponseAuthReq}
-                    />
-                ))}
-                {authRequestData?.authBartenderRequest && (
-                    <BartenderAuthCard
-                        bartender={authRequestData.authBartenderRequest}
-                        isVisible={showApprovalCard}
-                        sendResponseAuthReq={sendResponseAuthReq}
-                    />
-                )}
-            </div>
+            { loading 
+            ? (<Loading title="Aguarde, carregando..." />) 
+            : (
+                <div className="card-container">
+                    { isVisible && data && Array.isArray(data) ? (
+                        data.map((bartender: any) => (
+                            <BartenderAuthCard
+                                key={bartender.id}
+                                bartender={bartender}
+                                sendResponseAuthReq={sendResponseAuthReq}
+                            />
+                        ))
+                    ) : (
+                        <></>
+                    )}
+                </div>
+            )}
         </>
     );
-  }
+}
     
   export default Admin;
