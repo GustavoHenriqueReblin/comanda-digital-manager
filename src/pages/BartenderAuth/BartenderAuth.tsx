@@ -54,6 +54,12 @@ function BartenderAuth() {
         }
     };
 
+    const deleteCookie = (cookieName: any) => {
+        if (cookieName) {
+            Cookies.remove(cookieName);
+        }
+    }
+
     useEffect(() => { 
        verifyBartenderToken();   
  
@@ -86,6 +92,7 @@ function BartenderAuth() {
                     setIsInputBlocked(false);
                     const { id } = bartenderDataIsWaiting ? bartenderDataIsWaiting : { id: 0 };
 
+                    deleteCookie(process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST);
                     if (data.token && Number(id) === Number(data.id) && data.isApproved) { // Aprovou
                         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
                         if (cookieName) {

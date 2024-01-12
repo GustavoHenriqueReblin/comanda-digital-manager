@@ -1,28 +1,10 @@
+@import '../../variables.scss';
+
 .card-container {
-    height: 90%;
+    height: fit-content;
     width: 280px;
-    padding: 10px;
+    background-color: transparent;
     position: absolute;
     right: calc(50% - 140px);
     top: 40px;
-    background-color: transparent;
-
-    .card {
-        height: 90px;
-        width: auto;
-        margin: 10px 0;
-        background-color: aquamarine;
-        z-index: 1000;
-
-        .buttons-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            .button {
-                margin: 0 10px;
-                cursor: pointer;
-            }
-        }
-    }
 }
