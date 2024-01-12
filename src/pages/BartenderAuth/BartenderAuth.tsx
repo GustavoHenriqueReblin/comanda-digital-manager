@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
-import '../Login/login.scss';
 import './bartenderAuth.scss';
 import Loading from "../../components/Loading";
 
