@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useLazyQuery } from '@apollo/client';
-import { GetUser } from '../../graphql/queries/userQueries';
+import { GetUser } from '../../graphql/queries/user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { routeTitles } from '../../types/types';
 import { Helmet } from 'react-helmet';

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import './admin.scss';
 
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
-import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE, GetBartendersAreWaiting, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
+import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
+import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
+import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
 import Loading from "../../components/Loading";
 import Cookies from "js-cookie";

@@ -8,7 +8,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
-import { BARTENDER_AUTH_RESPONSE, GetBartender, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
+import { GetBartender } from "../../graphql/queries/bartender";
+import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
+import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { routeTitles } from "../../types/types";
 import { Helmet } from "react-helmet";
@@ -16,15 +18,6 @@ import { Helmet } from "react-helmet";
 interface BartenderFormData {
     securityCode: string;
 };
-
-interface BartenderData {
-    id: string;
-    name: string;
-    securityCode: string;
-    isWaiting: boolean;
-    isApproved: boolean;
-    token: string;
-}
 
 const bartenderFormSchema = z.object({
     securityCode: z.string().nonempty('O código é obrigatório'),
@@ -71,21 +64,6 @@ function BartenderAuth() {
         if (cookieName) {
             Cookies.remove(cookieName);
         }
-    };
-
-    const saveBartenderData = (data: BartenderData) => {
-        let cookieName;
-        const { isWaiting, isApproved, token, ...bartenderData } = data;
-        
-        cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-        if (cookieName) {
-            Cookies.set(cookieName, JSON.stringify(token), { expires: 1 });
-        }
-
-        cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_DATA;
-        if (cookieName) {
-            Cookies.set(cookieName, JSON.stringify(bartenderData), { expires: 1 });
-        }          
     };
 
     const cancelRequestWait = (refresh: boolean = false) => {
@@ -147,7 +125,10 @@ function BartenderAuth() {
                     cancelRequestWait();
                     const { id } = bartenderDataIsWaiting ? bartenderDataIsWaiting : { id: 0 };
                     if (data.token && Number(id) === Number(data.id) && data.isApproved) { // Aprovou
-                        saveBartenderData(data);
+                        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+                        if (cookieName) {
+                            Cookies.set(cookieName, JSON.stringify(data.token), { expires: 1 });
+                        }  
                         verifyBartenderToken();
                     } else { // Recusou
                         window.location.reload();

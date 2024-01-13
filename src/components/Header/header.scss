@@ -78,6 +78,23 @@
             }
         }
 
+        .button {
+            width: 75px;
+            padding: 6px 10px;
+            margin: 6px 0;
+            border-radius: 4px;
+            border: 2px solid $text-error;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease-in-out;
+
+            &:hover {
+                transition: box-shadow 0.2s ease-in-out;
+                box-shadow: 1px 1px 6px 1px rgba(0,0,0,0.57);
+                -webkit-box-shadow: 1px 1px 6px 1px rgba(0,0,0,0.57);
+                -moz-box-shadow: 1px 1px 6px 1px rgba(0,0,0,0.57);
+            }
+        }
+
         h2 {
             letter-spacing: 4px;
         }

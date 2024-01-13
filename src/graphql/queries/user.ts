@@ -21,3 +21,9 @@ export const GetUser = gql`
     }
   }
 `;
+
+export const GetIdByToken = gql`
+    query Query($input: UserInput!) {
+      getIdByToken(input: $input)
+    }
+`;
