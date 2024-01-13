@@ -21,11 +21,11 @@ function Header() {
                         <div className="line"></div>
                     </span>
                 </div>
-                <div className="menu">
+                {/* <div className="menu">
                     <div onClick={() => redirectTo(TypeRedirect.ADMIN)} className="menu-box">
                         <h2>ADMIN</h2>
                     </div>
-                </div>
+                </div> */}
             </div>
         </>
     )

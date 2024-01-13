@@ -9,7 +9,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { BARTENDER_AUTH_RESPONSE, GetBartender, UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { routeTitles } from "../../types/types";
+import { Helmet } from "react-helmet";
 
 interface BartenderFormData {
     securityCode: string;
@@ -40,6 +42,8 @@ function BartenderAuth() {
         resolver: zodResolver(bartenderFormSchema),
     });
     const navigate = useNavigate();
+    const location = useLocation();
+    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
     const verifyRequstAuthInCookie = (): boolean => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
@@ -180,6 +184,9 @@ function BartenderAuth() {
             ? ( <Loading title="Aguarde, carregando..." /> ) 
             : (
                 <form className="bartender-container" onSubmit={handleSubmit(validateBartenderCode)}>
+                    <Helmet>
+                        <title>{pageTitle}</title>
+                    </Helmet>
                     <label className='label-input'>Seu código de segurança:</label>
                     <input
                         className='input'

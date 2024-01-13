@@ -7,6 +7,9 @@ import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE, GetBartendersAreWaitin
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
 import Loading from "../../components/Loading";
 import Cookies from "js-cookie";
+import { routeTitles } from "../../types/types";
+import { useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 function Admin() {
     const [loading, setLoading] = useState<Boolean>(true);
@@ -16,6 +19,8 @@ function Admin() {
     const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
     const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
+    const location = useLocation();
+    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
     const sendResponseAuthReq = (bartender: any, approved: boolean) => {
         updateBartender({ variables: {
@@ -80,6 +85,9 @@ function Admin() {
             ? (<Loading title="Aguarde, carregando..." />) 
             : (
                 <>
+                    <Helmet>
+                        <title>{pageTitle}</title>
+                    </Helmet>
                     <div className="card-container">
                         { isVisible && data && Array.isArray(data) ? (
                             data.map((bartender: any) => (

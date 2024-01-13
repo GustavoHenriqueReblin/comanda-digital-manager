@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
+    "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3"
   }
 }

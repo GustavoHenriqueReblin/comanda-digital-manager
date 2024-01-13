@@ -1,17 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Modal from "../../components/Modal/Modal";
+import './bartenderQueue.scss';
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useMutation } from "@apollo/client";
 import { UPDATE_BARTENDER } from "../../graphql/queries/bartenderQueries";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { routeTitles } from "../../types/types";
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
     const [isModalExitOpen, setIsModalExitOpen] = useState<boolean>(false);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const navigate = useNavigate();
+    const location = useLocation();
+    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
     const exit = () => {
         let cookieName;
@@ -58,15 +63,25 @@ function BartenderQueue() {
 
     return (
         <>
-            <h1>Seja bem vindo {name}!</h1>
-            <button onClick={() => setIsModalExitOpen(true)} className='button' type="button">Sair</button>
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
+            <div className="queue-container">
+                <div className="queue-header">
+                    <h2 className="title">Seja bem vindo(a) {name}!</h2>
+                    <button onClick={() => setIsModalExitOpen(true)} className='button' type="button">Sair</button>
+                </div>
+                <div className="queue-main">
+                    
+                </div>
 
-            <Modal 
-                title={"Deseja realmente sair?"}
-                isOpen={isModalExitOpen} 
-                onClose={() => {setIsModalExitOpen(false)}} 
-                onConfirm={() => exit()}
-            />
+                <Modal 
+                    title={"Deseja realmente sair?"}
+                    isOpen={isModalExitOpen} 
+                    onClose={() => {setIsModalExitOpen(false)}} 
+                    onConfirm={() => exit()}
+                />
+            </div>
         </>
     )
 }

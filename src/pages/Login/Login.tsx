@@ -4,12 +4,14 @@ import './login.scss';
 import Cookies from 'js-cookie';
 import Loading from '../../components/Loading';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useLazyQuery } from '@apollo/client';
 import { GetUser } from '../../graphql/queries/userQueries';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { routeTitles } from '../../types/types';
+import { Helmet } from 'react-helmet';
 
 const loginUserFormSchema = z.object({
   user: z.string().nonempty('O e-mail é obrigatório').email('E-mail inválido!'),
@@ -29,6 +31,8 @@ function Login() {
   const [loading, setLoading] = useState(true);
   const [getUser, { data }] = useLazyQuery(GetUser);
   const navigate = useNavigate();
+  const location = useLocation();
+  const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
   // Ao dar o refetch no usuário verifica os dados
   useEffect(() => {
@@ -70,6 +74,9 @@ function Login() {
       ? ( <Loading title="Aguarde, carregando..." /> ) 
       : (
         <form className='login' onSubmit={handleSubmit(validateLogin)}>
+          <Helmet>
+              <title>{pageTitle}</title>
+          </Helmet>
           <label className='label-input'>E-mail:</label>
           <input
             className='input'
