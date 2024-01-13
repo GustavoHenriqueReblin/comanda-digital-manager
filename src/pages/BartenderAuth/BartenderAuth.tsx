@@ -58,7 +58,34 @@ function BartenderAuth() {
         if (cookieName) {
             Cookies.remove(cookieName);
         }
-    }
+    };
+
+    const cancelRequestWait = (refresh: boolean = false) => {
+        setIsInputBlocked(false);
+        setSecurityCodeValue('securityCode', "");
+
+        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
+        if (cookieName) {
+          const bartender = Cookies.get(cookieName);
+          
+          if (bartender) {
+            const bartenderObj = JSON.parse(bartender);
+            updateBartender({
+              variables: {
+                input: {
+                  id: bartenderObj.id,
+                  isWaiting: false,
+                  isApproved: false,
+                  token: "",
+                },
+              },
+            });
+          }
+        }
+      
+        deleteCookie(cookieName);
+        refresh && window.location.reload();
+    };
 
     useEffect(() => { 
        verifyBartenderToken();   
@@ -89,10 +116,8 @@ function BartenderAuth() {
                     verifyRequstAuthInCookie();
 
                 } else { // Recebeu resposta da solicitação
-                    setIsInputBlocked(false);
+                    cancelRequestWait();
                     const { id } = bartenderDataIsWaiting ? bartenderDataIsWaiting : { id: 0 };
-
-                    deleteCookie(process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST);
                     if (data.token && Number(id) === Number(data.id) && data.isApproved) { // Aprovou
                         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
                         if (cookieName) {
@@ -104,8 +129,9 @@ function BartenderAuth() {
                     }
                 }
             }
-        } else {
-            verifyRequstAuthInCookie();
+        } else if (!verifyRequstAuthInCookie()) {
+            setIsInputBlocked(false);
+            setSecurityCodeValue('securityCode', "");
         }
 
         if (bartenderData && bartenderData.bartender.message !== null) {
@@ -145,7 +171,12 @@ function BartenderAuth() {
                     {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
                     {resMessage !== '' && <span className='error-input'>{resMessage}</span>}
                     { bartenderDataIsWaiting
-                    ? (<label className='label-input'>Aguardando aprovação...</label>) 
+                    ? (
+                        <>
+                            <label className='label-input'>Aguardando aprovação...</label>
+                            <button onClick={() => cancelRequestWait(true)} className='button' type="button">Cancelar</button>
+                        </>
+                    ) 
                     : (<button className='button' type="submit">Enviar</button>)}
                 </form>
             )}
