@@ -9,13 +9,13 @@ import Loading from "../../components/Loading";
 import Cookies from "js-cookie";
 
 function Admin() {
-    const [loading, setLoading] = useState(true);
-    const [isVisible, setIsVisible] = useState(false);
+    const [loading, setLoading] = useState<Boolean>(true);
+    const [isVisible, setIsVisible] = useState<Boolean>(false);
     const [data, setData] = useState<any>();
     const [getBartendersAreWaiting] = useLazyQuery(GetBartendersAreWaiting);
     const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
-    const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
+    const [updateBartender] = useMutation(UPDATE_BARTENDER);
 
     const sendResponseAuthReq = (bartender: any, approved: boolean) => {
         updateBartender({ variables: {

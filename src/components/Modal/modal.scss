@@ -1,0 +1,131 @@
+@import '../../variables.scss';
+
+.modal-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .modal {
+        background-color: $text-color;
+        border-radius: 6px;
+        transition: transform 0.06s ease-in-out;
+        display: grid;
+        grid-template-columns: 100%;
+        box-shadow: 14px 11px 20px -1px rgba(0,0,0,0.57);
+        -webkit-box-shadow: 14px 11px 20px -1px rgba(0,0,0,0.57);
+        -moz-box-shadow: 14px 11px 20px -1px rgba(0,0,0,0.57);
+
+        @media screen and (min-width: 1px) {
+            height: 200px;
+            width: 92vw;
+            grid-template-rows: 2% 57% 41%;
+        }
+    
+        @media screen and (min-width: 520px) {
+            height: 180px;
+            width: 580px;
+            grid-template-rows: 4% 50% 46%;
+        }
+    }
+
+    &:active .modal {
+        transform: scale(1.01);
+    }
+
+    .close-container {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
+    
+        .close-button {
+            height: 32px;
+            width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background-color: $text-color;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out;
+            z-index: 1001;
+
+            @media screen and (min-width: 1px) {
+                margin: 5px;
+                font-size: x-large;
+                &:hover {
+                    transform: none;
+                    transition: none;
+                }
+            }
+        
+            @media screen and (min-width: 520px) {
+                margin: -8px -10px 0 0;
+                box-shadow: darken($color: $bg-color, $amount: 1) 2px 2px 4px 1px;
+                font-size: larger;
+                &:hover {
+                    transform: scale(1.08);
+                    transition: transform 0.15s ease-in-out;
+                }
+            }
+        }
+    }
+
+    .title-container {
+        height: auto;
+        padding: 20px 0 0 30px;
+
+        .title {
+            width: 100%;
+            font-size: x-large;
+        }
+    }
+
+    .choices {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 50px;
+        z-index: 1001;
+
+        .button {
+            height: 42px;
+            width: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: larger;
+            border: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: darken($color: $text-color, $amount: 40%) 2px 2px 4px 1px;
+            cursor: pointer;
+
+            &.yes {
+                border: 3px solid rgba(24, 143, 0, 0.6);
+                &:hover {
+                    background-color: rgba(24, 143, 0, 0.6);
+                    box-shadow: darken($color: $bg-color, $amount: 1) 2px 2px 4px 1px;
+                    transition: all 0.3s ease-in-out;
+                }
+            }
+
+            &.no {
+                border: 3px solid rgba(223, 45, 45, 0.664);
+                &:hover {
+                    background-color: rgba(223, 45, 45, 0.664);
+                    transition: all 0.3s ease-in-out;
+                }
+            }
+        }
+    }
+}
