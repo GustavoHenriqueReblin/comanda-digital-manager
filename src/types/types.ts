@@ -14,6 +14,24 @@ export type Bartender = {
     isApproved: boolean
 };
 
+export type OrderItems = {
+    id: number,
+    orderId: number,
+    productId: number,
+    value: number,
+    status: number, // 0: Cancelado, 1: Confirmado
+};
+
+export type Order = {
+    id: number,
+    bartenderId: number,
+    tableId: number,
+    value: number,
+    date: Date,
+    status: number, // 0: Concluído, 1: Resgatado, 2: Confirmado, 3: Finalizado
+    items: [OrderItems],
+};
+
 export enum TypeRedirect {
     ADMIN,
     ROOT
