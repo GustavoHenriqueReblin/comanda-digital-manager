@@ -62,19 +62,19 @@ function BartenderQueue() {
             };
 
             fetchBartenderData()
-                .then(data => {
+                .then((data) => {
                     setName(data as string);
-                    fetchOrdersData()
-                        .then(data => {
-                            setData(data as Order[]);
-                            setLoading(false);
-                        })
-                        .catch(error => {
-                            console.error("Erro ao buscar os pedidos: ", error);
-                        });
+                    return fetchOrdersData();
                 })
-                .catch(error => {
-                    console.error("Erro ao buscar os dados do garçom: ", error);
+                .then((data) => {
+                    setData(data as Order[]);
+                    setLoading(false);
+                })
+                .catch((bartenderError) => {
+                    console.error("Erro ao buscar os dados do garçom:", bartenderError);
+                })
+                .catch((ordersError) => {
+                    console.error("Erro ao buscar os pedidos:", ordersError);
                 });
         }
     }, [bartenderData]);
