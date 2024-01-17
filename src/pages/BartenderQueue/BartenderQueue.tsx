@@ -10,7 +10,6 @@ import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { useLazyQuery, useSubscription } from '@apollo/client';
 import Loading from '../../components/Loading';
 import { GetOrders } from '../../graphql/queries/order';
-import { BartenderOrdersContext } from '../../contexts/BartenderOrdersContext';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 
 function BartenderQueue() {
@@ -103,34 +102,30 @@ function BartenderQueue() {
             ? (<Loading title="Aguarde, carregando..." />) 
             : (
                 <>
-                    <BartenderOrdersContext.Provider value={
-                        { data, setData }
-                    }>
-                        <Helmet>
-                            <title>{pageTitle}</title>
-                        </Helmet>
-                        <div className="queue-container">
-                            <div className="queue-header">
-                                <h2 className="title">Seja bem vindo(a) {name}!</h2>
-                                <select id="filter-order" onClick={handleFilterSelect}>
-                                    {OrderFilterOptions.map(option => (
-                                        <option key={option.id} value={option.value}>
-                                            {option.description}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="queue-main">
-                                { data && data.length > 0 ? (
-                                    <span>
-                                        {JSON.stringify(data.filter((order) => order.status === Number(filterIndex)))}
-                                    </span>
-                                ) : (
-                                    <></>
-                                )}
-                            </div>
+                    <Helmet>
+                        <title>{pageTitle}</title>
+                    </Helmet>
+                    <div className="queue-container">
+                        <div className="queue-header">
+                            <h2 className="title">Seja bem vindo(a) {name}!</h2>
+                            <select id="filter-order" onClick={handleFilterSelect}>
+                                {OrderFilterOptions.map(option => (
+                                    <option key={option.id} value={option.value}>
+                                        {option.description}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    </BartenderOrdersContext.Provider>
+                        <div className="queue-main">
+                            { data && data.length > 0 ? (
+                                <span>
+                                    {JSON.stringify(data.filter((order) => order.status === Number(filterIndex)))}
+                                </span>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                    </div>
                 </>
             )}
         </>
