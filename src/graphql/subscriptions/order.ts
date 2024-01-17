@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
-export const COMPLETED_ORDERS = gql`
-    subscription CompletedOrders {
-        completedOrders {
+export const CHANGE_ORDER_STATUS = gql`
+    subscription ChangeOrderStatus {
+        ChangeOrderStatus {
             data {
                 id
                 bartenderId
@@ -18,7 +18,7 @@ export const COMPLETED_ORDERS = gql`
                     status
                 }
             }
-            message  
+            message
         }
     }
 `;

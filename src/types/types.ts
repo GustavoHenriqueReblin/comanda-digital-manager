@@ -42,6 +42,18 @@ export enum TypeOfGet {
     USER
 };
 
+enum OrderFilter {
+    COMPLETED,
+    REDEEMED,
+    CONFIRMED
+};
+
+export const OrderFilterOptions = [
+    { id: 1, description: "Concluídos", value: OrderFilter.COMPLETED },
+    { id: 2, description: "Resgatados", value: OrderFilter.REDEEMED },
+    { id: 3, description: "Confirmados", value: OrderFilter.CONFIRMED },
+];
+
 export const routeTitles: Record<string, string> = {
     '/': 'Comanda digital - Página Inicial',
     '/admin': 'Comanda digital - Área do ADMIN',

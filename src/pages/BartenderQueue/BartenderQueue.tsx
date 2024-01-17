@@ -5,20 +5,21 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Order, routeTitles } from "../../types/types";
+import { Order, OrderFilterOptions, routeTitles } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { useLazyQuery, useSubscription } from '@apollo/client';
 import Loading from '../../components/Loading';
 import { GetOrders } from '../../graphql/queries/order';
 import { BartenderOrdersContext } from '../../contexts/BartenderOrdersContext';
-import { COMPLETED_ORDERS } from "../../graphql/subscriptions/order";
+import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<Boolean>(true);
     const [data, setData] = useState<Order[] | null>(null);
+    const [filterIndex, setFilterIndex] = useState<string>('0');
 
-    const { data: completedOrdersData } = useSubscription(COMPLETED_ORDERS);
+    const { data: OrdersData } = useSubscription(CHANGE_ORDER_STATUS);
     const [getBartenderDataByToken, { data: bartenderData }] = useLazyQuery(GetBartenderDataByToken);
     const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
 
@@ -49,7 +50,7 @@ function BartenderQueue() {
                 if (!ordersData) {
                     return new Promise((resolve, reject) => {
                         getOrdersData({
-                            variables: { input: { status: [0] } },
+                            variables: { input: { status: [0,1,2] } },
                         })
                             .then(res => {
                                 resolve(res.data.orders);
@@ -67,6 +68,7 @@ function BartenderQueue() {
                     return fetchOrdersData();
                 })
                 .then((data) => {
+                    setFilterIndex('0');
                     setData(data as Order[]);
                     setLoading(false);
                 })
@@ -80,10 +82,20 @@ function BartenderQueue() {
     }, [bartenderData]);
 
     useEffect(() => { 
-        if (completedOrdersData) {
-            setData(completedOrdersData.completedOrders as Order[]);
+        if (OrdersData) {
+            setData(
+                (OrdersData?.ChangeOrderStatus || []).map((order: any) => {
+                    return {
+                        ...order.data,
+                    } as Order;
+                })
+            );
         }
-    }, [completedOrdersData]);
+    }, [OrdersData]);
+
+    const handleFilterSelect = (event: any) => {
+        setFilterIndex(event.target.value);
+    };
 
     return (
         <>
@@ -100,12 +112,22 @@ function BartenderQueue() {
                         <div className="queue-container">
                             <div className="queue-header">
                                 <h2 className="title">Seja bem vindo(a) {name}!</h2>
+                                <select id="filter-order" onClick={handleFilterSelect}>
+                                    {OrderFilterOptions.map(option => (
+                                        <option key={option.id} value={option.value}>
+                                            {option.description}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="queue-main">
-                                { data && data !== null
-                                    ?(<><span>{JSON.stringify(data)}</span></>)
-                                    :(<></>)
-                                }
+                                { data && data.length > 0 ? (
+                                    <span>
+                                        {JSON.stringify(data.filter((order) => order.status === Number(filterIndex)))}
+                                    </span>
+                                ) : (
+                                    <></>
+                                )}
                             </div>
                         </div>
                     </BartenderOrdersContext.Provider>
