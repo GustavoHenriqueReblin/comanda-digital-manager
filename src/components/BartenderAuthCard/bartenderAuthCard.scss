@@ -15,11 +15,6 @@
     -webkit-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.57);
     -moz-box-shadow: 5px 4px 10px -1px rgba(0,0,0,0.57);
 
-    &:hover{
-        transform: scale(1.01);
-        transition: transform 0.3s ease-in-out;
-    }
-
     .card-header {
         height: fit-content;
         padding: 0 10px;
@@ -47,13 +42,16 @@
             border-radius: 4px;
             border: 2px solid black;
             cursor: pointer;
+            transition: all 0.3s ease-in-out;
 
             &.yes:hover{
                 background-color: darken($color: $main-green, $amount: 1%);
+                transition: all 0.3s ease-in-out;
             }
 
             &.no:hover{
                 background-color: darken($color: $text-error, $amount: 1%);
+                transition: all 0.3s ease-in-out;
             }
         }
     }
