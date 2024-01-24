@@ -2,15 +2,18 @@
 import './bartenderQueue.scss';
 
 import React, { useEffect, useState } from "react";
+import Loading from '../../components/Loading';
+import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
+
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Order, OrderFilterOptions, routeTitles } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { useLazyQuery, useSubscription } from '@apollo/client';
-import Loading from '../../components/Loading';
 import { GetOrders } from '../../graphql/queries/order';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
+import { FormatDate } from '../../helper';
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
@@ -24,6 +27,77 @@ function BartenderQueue() {
 
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+
+    const tableOrderColumns = [
+        {
+            name: 'Código da mesa',
+            selector: (row: any) => row.tableCode,
+            width: "190px"  
+        },
+        {
+            name: 'Valor total',
+            selector: (row: any) => {
+                return Number(row.value).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                });
+            },
+            width: "160px"  
+        },
+        {
+            name: 'Data',
+            selector: (row: any) => {return FormatDate(row.date)},
+            width: "200px"  
+        },
+        {
+            name: 'Status',
+            selector: (row: any) => {
+                switch (row.status) {
+                    case 0:
+                        return 'Concluído';
+
+                    case 1:
+                        return 'Resgatado';
+
+                    case 2:
+                        return 'Confirmado';
+
+                    case 3:
+                        return 'Finalizado';
+                
+                    default:
+                        break;
+                }
+                
+            },
+            width: "140px"  
+        },
+        {
+            name: 'Opções',
+            selector: () => {
+                return (
+                    <>
+                        <button className='button confirm'>Confirmar</button>
+                        <button className='button cancel'>Cancelar</button>
+                    </>
+                )
+            },
+        },
+    ];
+
+    const tableOrderStyle = {
+        headCells: {
+            style: {
+                fontSize: "18px",
+                fontWeight: "900",
+            }
+        },
+        rows: {
+            style: {
+                fontSize: "16px",
+            }
+        },
+    };
 
     useEffect(() => { 
         if (!bartenderData) {
@@ -118,9 +192,12 @@ function BartenderQueue() {
                         </div>
                         <div className="queue-main">
                             { data && data.length > 0 ? (
-                                <span>
-                                    {JSON.stringify(data.filter((order) => order.status === Number(filterIndex)))}
-                                </span>
+                                <CustomDataTable
+                                    columns={tableOrderColumns}
+                                    data={data.filter((order) => order.status === Number(filterIndex))}
+                                    customStyles={tableOrderStyle}
+                                    noDataMessage='Sem pedidos com o status selecionado :('
+                                ></CustomDataTable>
                             ) : (
                                 <></>
                             )}
