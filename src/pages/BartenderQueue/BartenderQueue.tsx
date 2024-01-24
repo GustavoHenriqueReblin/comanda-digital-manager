@@ -14,7 +14,6 @@ import { useLazyQuery, useSubscription } from '@apollo/client';
 import { GetOrders } from '../../graphql/queries/order';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { FormatDate } from '../../helper';
-import { IoIosArrowDown } from "react-icons/io";
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
@@ -198,6 +197,8 @@ function BartenderQueue() {
                                     data={data.filter((order) => order.status === Number(filterIndex))}
                                     customStyles={tableOrderStyle}
                                     noDataMessage='Sem pedidos com o status selecionado :('
+                                    defaultSortFieldId={2}
+                                    defaultSortAsc
                                 ></CustomDataTable>
                             ) : (
                                 <></>
