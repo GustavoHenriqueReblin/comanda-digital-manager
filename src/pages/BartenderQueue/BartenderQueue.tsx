@@ -48,7 +48,7 @@ function BartenderQueue() {
         {
             name: 'Data',
             selector: (row: any) => {return FormatDate(row.date)},
-            width: "200px"  
+            width: "160px"  
         },
         {
             name: 'Status',
