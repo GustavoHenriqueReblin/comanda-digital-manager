@@ -1,5 +1,6 @@
 import React from "react";
 import DataTable from "react-data-table-component";
+import './customDataTable.scss';
 
 interface CustomDataTableProps {
     columns: any[];
@@ -11,7 +12,7 @@ interface CustomDataTableProps {
 function CustomDataTable({ columns, data, noDataMessage, customStyles }: CustomDataTableProps) {
     return (
         <>
-            <DataTable 
+            <DataTable className={`table ${data.length <= 0 && 'noData'}`}
                 columns={columns}
                 data={data}
                 fixedHeader

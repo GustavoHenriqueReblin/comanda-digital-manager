@@ -14,6 +14,7 @@ import { useLazyQuery, useSubscription } from '@apollo/client';
 import { GetOrders } from '../../graphql/queries/order';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { FormatDate } from '../../helper';
+import { IoIosArrowDown } from "react-icons/io";
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
@@ -182,10 +183,10 @@ function BartenderQueue() {
                     <div className="queue-container">
                         <div className="queue-header">
                             <h2 className="title">Seja bem vindo(a) {name}!</h2>
-                            <select id="filter-order" onClick={handleFilterSelect}>
+                            <select id="filter-order" className='filter-order' onClick={handleFilterSelect}>
                                 {OrderFilterOptions.map(option => (
                                     <option key={option.id} value={option.value}>
-                                        {option.description}
+                                        {option.description} 
                                     </option>
                                 ))}
                             </select>
