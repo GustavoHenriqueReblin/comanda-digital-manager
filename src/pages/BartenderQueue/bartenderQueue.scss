@@ -29,10 +29,20 @@
             outline: 0;
             border: 2px solid $gray;
             border-radius: 6px;
-            // appearance: none;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
 
             &:hover {
                 background-color: lighten($color: $gray, $amount: 41%);
+            }
+
+            .filter-order-option {
+                color: black;
+
+                &::selection {
+                    background-color: aquamarine;
+                }
             }
         }
     }

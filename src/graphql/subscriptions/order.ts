@@ -7,6 +7,7 @@ export const CHANGE_ORDER_STATUS = gql`
                 id
                 bartenderId
                 tableId
+                tableCode
                 value
                 date
                 status

@@ -184,7 +184,7 @@ function BartenderQueue() {
                             <h2 className="title">Seja bem vindo(a) {name}!</h2>
                             <select id="filter-order" className='filter-order' onClick={handleFilterSelect}>
                                 {OrderFilterOptions.map(option => (
-                                    <option key={option.id} value={option.value}>
+                                    <option className='filter-order-option' key={option.id} value={option.value}>
                                         {option.description} 
                                     </option>
                                 ))}

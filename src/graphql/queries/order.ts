@@ -6,6 +6,7 @@ export const GetOrders = gql`
             id
             bartenderId
             tableId
+            tableCode
             value
             date
             status
