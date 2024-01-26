@@ -14,6 +14,7 @@ import { useLazyQuery, useSubscription } from '@apollo/client';
 import { GetOrders } from '../../graphql/queries/order';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { FormatDate } from '../../helper';
+import CustomSelect from '../../components/CustomSelect/CustomSelect';
 
 function BartenderQueue() {
     const [name, setName] = useState<string>("");
@@ -166,8 +167,8 @@ function BartenderQueue() {
         }
     }, [OrdersData]);
 
-    const handleFilterSelect = (event: any) => {
-        setFilterIndex(event.target.value);
+    const handleFilterSelect = (newFilterIndex: string) => {
+        setFilterIndex(newFilterIndex);
     };
 
     return (
@@ -182,13 +183,10 @@ function BartenderQueue() {
                     <div className="queue-container">
                         <div className="queue-header">
                             <h2 className="title">Seja bem vindo(a) {name}!</h2>
-                            <select id="filter-order" className='filter-order' onClick={handleFilterSelect}>
-                                {OrderFilterOptions.map(option => (
-                                    <option className='filter-order-option' key={option.id} value={option.value}>
-                                        {option.description} 
-                                    </option>
-                                ))}
-                            </select>
+                            <CustomSelect 
+                                options={OrderFilterOptions} 
+                                onClickFilter={handleFilterSelect}
+                            />
                         </div>
                         <div className="queue-main">
                             { data && data.length > 0 ? (
