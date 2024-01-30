@@ -8,16 +8,17 @@ import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Order, OrderFilterOptions, routeTitles } from "../../types/types";
+import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
-import { useLazyQuery, useSubscription } from '@apollo/client';
+import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
 import { GetOrders } from '../../graphql/queries/order';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { FormatDate } from '../../helper';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
+import { UPDATE_ORDER } from '../../graphql/mutations/order';
 
 function BartenderQueue() {
-    const [name, setName] = useState<string>("");
+    const [bartender, setBartender] = useState<Bartender | null>(null);
     const [loading, setLoading] = useState<Boolean>(true);
     const [data, setData] = useState<Order[] | null>(null);
     const [filterIndex, setFilterIndex] = useState<string>('0');
@@ -25,11 +26,31 @@ function BartenderQueue() {
     const { data: OrdersData } = useSubscription(CHANGE_ORDER_STATUS);
     const [getBartenderDataByToken, { data: bartenderData }] = useLazyQuery(GetBartenderDataByToken);
     const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
+    const [updateOrder] = useMutation(UPDATE_ORDER);
 
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
+    const setOrderStatus = (id: Number, newStatus: OrderFilter) => {
+        updateOrder({
+            variables: {
+                input: {
+                    id,
+                    bartenderId: bartender?.id,
+                    status: newStatus,
+                },
+            },
+        }).catch((error) => {
+            console.error("Erro ao atualizar o pedido: ", error);
+        });
+    };
+
     const tableOrderColumns = [
+        {
+            name: 'Código do pedido',
+            selector: (row: any) => row.id,
+            width: "180px"  
+        },
         {
             name: 'Código da mesa',
             selector: (row: any) => row.tableCode,
@@ -43,7 +64,7 @@ function BartenderQueue() {
                     currency: 'BRL',
                 });
             },
-            width: "160px"  
+            width: "160px",
         },
         {
             name: 'Data',
@@ -54,17 +75,20 @@ function BartenderQueue() {
             name: 'Status',
             selector: (row: any) => {
                 switch (row.status) {
-                    case 0:
-                        return 'Concluído';
+                    case OrderFilter.COMPLETED:
+                        return OrderFilterOptions[OrderFilter.COMPLETED].description;
 
-                    case 1:
-                        return 'Resgatado';
+                    case OrderFilter.REDEEMED:
+                        return OrderFilterOptions[OrderFilter.REDEEMED].description;
 
-                    case 2:
-                        return 'Confirmado';
+                    case OrderFilter.CONFIRMED:
+                        return OrderFilterOptions[OrderFilter.CONFIRMED].description;
 
-                    case 3:
-                        return 'Finalizado';
+                    case OrderFilter.FINISHED:
+                        return OrderFilterOptions[OrderFilter.FINISHED].description;
+
+                    case OrderFilter.CANCELED:
+                        return OrderFilterOptions[OrderFilter.CANCELED].description;
                 
                     default:
                         break;
@@ -75,22 +99,37 @@ function BartenderQueue() {
         },
         {
             name: 'Opções',
-            selector: () => {
+            selector: (row: any) => {
                 return (
-                    <>
-                        <button className='button confirm'>Confirmar</button>
-                        <button className='button cancel'>Cancelar</button>
-                    </>
+                    <div className='table-options'>
+                        <button className={`button confirm ${row.status !== 0 && 'disabled'}`} 
+                            onClick={() => row.status === 0 && setOrderStatus(row.id, OrderFilter.REDEEMED)}>
+                            Confirmar
+                        </button>
+                        <button className={`button cancel ${row.status !== 0 && 'disabled'}`}
+                            onClick={() => row.status === 0 && setOrderStatus(row.id, OrderFilter.CANCELED)}>
+                            Cancelar
+                        </button>
+                    </div>
                 )
             },
         },
     ];
 
     const tableOrderStyle = {
+        headRow: {
+            style: {
+                borderRadius: "4px",
+                backgroundColor: "#b6cde0",
+                border: 'none',
+                marginBottom: '6px',
+            }
+        },
         headCells: {
             style: {
                 fontSize: "18px",
                 fontWeight: "900",
+                cursor: 'pointer',
             }
         },
         rows: {
@@ -111,7 +150,7 @@ function BartenderQueue() {
                             variables: { input: { securityCode: "-1", token: token } },
                         })
                             .then(res => {
-                                resolve(res.data.getDataByToken.data.name);
+                                resolve(res.data.getDataByToken.data);
                             })
                             .catch(error => {
                                 reject(error);
@@ -124,7 +163,7 @@ function BartenderQueue() {
                 if (!ordersData) {
                     return new Promise((resolve, reject) => {
                         getOrdersData({
-                            variables: { input: { status: [0,1,2] } },
+                            variables: { input: { status: [0,1,2,3,4] } },
                         })
                             .then(res => {
                                 resolve(res.data.orders);
@@ -138,7 +177,7 @@ function BartenderQueue() {
 
             fetchBartenderData()
                 .then((data) => {
-                    setName(data as string);
+                    setBartender(data as Bartender);
                     return fetchOrdersData();
                 })
                 .then((data) => {
@@ -182,7 +221,7 @@ function BartenderQueue() {
                     </Helmet>
                     <div className="queue-container">
                         <div className="queue-header">
-                            <h2 className="title">Seja bem vindo(a) {name}!</h2>
+                            <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>
                             <CustomSelect 
                                 options={OrderFilterOptions} 
                                 onClickFilter={handleFilterSelect}

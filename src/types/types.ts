@@ -42,16 +42,20 @@ export enum TypeOfGet {
     USER
 };
 
-enum OrderFilter {
+export enum OrderFilter {
     COMPLETED,
     REDEEMED,
-    CONFIRMED
+    CONFIRMED,
+    FINISHED,
+    CANCELED
 };
 
 export const OrderFilterOptions = [
     { id: 1, description: "Concluídos", value: OrderFilter.COMPLETED },
     { id: 2, description: "Resgatados", value: OrderFilter.REDEEMED },
     { id: 3, description: "Confirmados", value: OrderFilter.CONFIRMED },
+    { id: 4, description: "Finalizados", value: OrderFilter.FINISHED },
+    { id: 5, description: "Cancelados", value: OrderFilter.CANCELED },
 ];
 
 export const routeTitles: Record<string, string> = {
