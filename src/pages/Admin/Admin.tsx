@@ -1,16 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
 import './admin.scss';
 
-import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
+import Loading from "../../components/Loading";
+import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
+import { routeTitles } from "../../types/types";
 import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
-import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
-import Loading from "../../components/Loading";
+
+import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { routeTitles } from "../../types/types";
 import { useLocation } from "react-router-dom";
+import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { Helmet } from "react-helmet";
 
 function Admin() {

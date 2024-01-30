@@ -1,5 +1,5 @@
-import React from "react";
 import './bartenderAuthCard.scss';
+import React from "react";
 
 interface BartenderAuthCardProps {
     bartender: any;

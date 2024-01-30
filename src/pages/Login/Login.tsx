@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
 import '../../global.scss';
 import './login.scss';
-import Cookies from 'js-cookie';
 import Loading from '../../components/Loading';
+import { routeTitles } from '../../types/types';
+import { GetUser } from '../../graphql/queries/user';
 
+import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useLazyQuery } from '@apollo/client';
-import { GetUser } from '../../graphql/queries/user';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { routeTitles } from '../../types/types';
 import { Helmet } from 'react-helmet';
 
 const loginUserFormSchema = z.object({

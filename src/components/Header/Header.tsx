@@ -1,16 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import './header.scss';
 import Modal from "../Modal/Modal";
-import Cookies from "js-cookie";
-
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
-import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
-import { UPDATE_USER } from "../../graphql/mutations/user";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { TypeOfGet, TypeRedirect } from '../../types/types';
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetIdByToken } from '../../graphql/queries/user';
-import { TypeOfGet, TypeRedirect } from '../../types/types';
+import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
+import { UPDATE_USER } from "../../graphql/mutations/user";
+
+import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useLazyQuery, useMutation } from "@apollo/client";
 
 function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);

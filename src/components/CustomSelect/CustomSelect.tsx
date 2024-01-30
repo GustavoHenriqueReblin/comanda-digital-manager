@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import './customSelect.scss';
+import React, { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 interface CustomSelectProps {

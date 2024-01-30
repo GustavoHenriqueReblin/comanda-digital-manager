@@ -1,12 +1,12 @@
-import Cookies from 'js-cookie';
 import Login from './Login/Login';
 import Admin from './Admin/Admin';
 import Bartender from './BartenderAuth/BartenderAuth';
+import BartenderQueue from './BartenderQueue/BartenderQueue';
 import ResponsiveProvider from "../components/ResponsiveProvider";
 import Header from "../components/Header/Header";
-import BartenderQueue from './BartenderQueue/BartenderQueue';
 
 import React from "react";
+import Cookies from 'js-cookie';
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 interface PrivateRouteProps {

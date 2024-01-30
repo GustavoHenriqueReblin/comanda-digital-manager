@@ -1,6 +1,6 @@
+import './customDataTable.scss';
 import React from "react";
 import DataTable from "react-data-table-component";
-import './customDataTable.scss';
 
 interface CustomDataTableProps {
     columns: any[];

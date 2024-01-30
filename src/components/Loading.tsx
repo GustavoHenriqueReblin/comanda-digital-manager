@@ -1,5 +1,5 @@
-import React from "react";
 import '../global.scss';
+import React from "react";
 
 interface LoadingProps {
     title: string;

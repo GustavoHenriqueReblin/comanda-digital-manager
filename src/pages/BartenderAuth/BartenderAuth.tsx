@@ -1,18 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
 import './bartenderAuth.scss';
-import Loading from "../../components/Loading";
 
+import Loading from "../../components/Loading";
+import { routeTitles } from "../../types/types";
+import { GetBartender } from "../../graphql/queries/bartender";
+import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
+import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
+
+import React, { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
-import { GetBartender } from "../../graphql/queries/bartender";
-import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
-import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { routeTitles } from "../../types/types";
 import { Helmet } from "react-helmet";
 
 interface BartenderFormData {

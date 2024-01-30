@@ -1,21 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import './bartenderQueue.scss';
 
-import React, { useEffect, useState } from "react";
 import Loading from '../../components/Loading';
 import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
+import CustomSelect from '../../components/CustomSelect/CustomSelect';
+import { FormatDate } from '../../helper';
+import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
+import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
+import { GetOrders } from '../../graphql/queries/order';
+import { UPDATE_ORDER } from '../../graphql/mutations/order';
+import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 
+import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
-import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
-import { GetOrders } from '../../graphql/queries/order';
-import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
-import { FormatDate } from '../../helper';
-import CustomSelect from '../../components/CustomSelect/CustomSelect';
-import { UPDATE_ORDER } from '../../graphql/mutations/order';
 
 function BartenderQueue() {
     const [bartender, setBartender] = useState<Bartender | null>(null);

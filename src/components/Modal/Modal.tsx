@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
 import './modal.scss';
+import React, { useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 
 interface ModalProps {
