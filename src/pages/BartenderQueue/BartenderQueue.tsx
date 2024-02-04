@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
+import { UPDATE_TABLE } from '../../graphql/mutations/table';
 
 function BartenderQueue() {
     const [bartender, setBartender] = useState<Bartender | null>(null);
@@ -26,12 +27,13 @@ function BartenderQueue() {
     const { data: OrdersData } = useSubscription(CHANGE_ORDER_STATUS);
     const [getBartenderDataByToken, { data: bartenderData }] = useLazyQuery(GetBartenderDataByToken);
     const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
+    const [updateTable] = useMutation(UPDATE_TABLE);
     const [updateOrder] = useMutation(UPDATE_ORDER);
 
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
-    const setOrderStatus = (id: Number, newStatus: OrderFilter) => {
+    const setOrderStatus = (id: Number, tableCode: number, newStatus: OrderFilter) => {
         updateOrder({
             variables: {
                 input: {
@@ -42,6 +44,18 @@ function BartenderQueue() {
             },
         }).catch((error) => {
             console.error("Erro ao atualizar o pedido: ", error);
+        }).then(() => {
+            updateTable({
+                variables: {
+                    input: {
+                        id: "-1",
+                        code: Number(tableCode),
+                        state: true,
+                    },
+                },
+            }).catch((error) => {
+                console.error("Erro ao liberar a mesa: ", error);
+            })
         });
     };
 
@@ -103,11 +117,11 @@ function BartenderQueue() {
                 return (
                     <div className='table-options'>
                         <button className={`button confirm ${row.status !== 0 && 'disabled'}`} 
-                            onClick={() => row.status === 0 && setOrderStatus(row.id, OrderFilter.REDEEMED)}>
+                            onClick={() => row.status === 0 && setOrderStatus(row.id, row.tableCode, OrderFilter.REDEEMED)}>
                             Confirmar
                         </button>
                         <button className={`button cancel ${row.status !== 0 && 'disabled'}`}
-                            onClick={() => row.status === 0 && setOrderStatus(row.id, OrderFilter.CANCELED)}>
+                            onClick={() => row.status === 0 && setOrderStatus(row.id, row.tableCode, OrderFilter.CANCELED)}>
                             Cancelar
                         </button>
                     </div>
