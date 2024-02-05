@@ -1,5 +1,5 @@
 import './customSelect.scss';
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 interface CustomSelectProps {
@@ -10,17 +10,31 @@ interface CustomSelectProps {
 function CustomSelect({ options, onClickFilter }: CustomSelectProps) {
     const [isVisible, setIsVisible] = useState<Boolean>(false);
     const [descriptionValue, setDescriptionValue] = useState<String>("Concluídos"); 
+    const selectRef = useRef<HTMLDivElement>(null);
 
-    const closeSelect = (newValue: string, Id: number) => {
+    const closeSelect = (newValue: string, id: number) => {
         setDescriptionValue(newValue);
         setIsVisible(false);
-        const Index = Id - 1;
+        const Index = id - 1;
         onClickFilter(Index.toString());
     };
 
+    useEffect(() => {
+        const handleClick = (e: any) => {
+            if (selectRef.current && !selectRef.current.contains(e.target)) {
+                setIsVisible(false);
+            }
+        };
+
+        document.addEventListener("click", handleClick);
+        return () => {
+            document.removeEventListener("click", handleClick);
+        };
+    }, []);
+
     return (
         <>
-            <div className="select-container" onClick={() => setIsVisible(!isVisible)}>
+            <div ref={selectRef} className="select-container" onClick={() => setIsVisible(!isVisible)}>
                 <span className="description">{descriptionValue}</span>
                 { isVisible 
                     ? (<IoIosArrowUp />)
