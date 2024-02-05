@@ -28,7 +28,7 @@ export type Order = {
     tableId: number,
     value: number,
     date: Date,
-    status: number, // 0: Concluído, 1: Resgatado, 2: Confirmado, 3: Finalizado
+    status: number, // 0: Concluído, 1: Resgatado, 2: Confirmado, 3: Finalizado, 4: Cancelado
     items: [OrderItems],
 };
 
