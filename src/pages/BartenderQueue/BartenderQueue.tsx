@@ -4,11 +4,13 @@ import './bartenderQueue.scss';
 import Loading from '../../components/Loading';
 import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
+import Modal from '../../components/Modal/Modal';
 import { FormatDate } from '../../helper';
 import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
+import { UPDATE_TABLE } from '../../graphql/mutations/table';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 
 import React, { useEffect, useState } from "react";
@@ -16,15 +18,21 @@ import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
-import { UPDATE_TABLE } from '../../graphql/mutations/table';
 
 function BartenderQueue() {
+    enum selectOrderOption {
+        CANCEL,
+        CONFIRM,
+    };
     const [bartender, setBartender] = useState<Bartender | null>(null);
     const [loading, setLoading] = useState<Boolean>(true);
     const [data, setData] = useState<Order[] | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [filterIndex, setFilterIndex] = useState<string>('0');
+    const [isModalCancelOpen, setIsModalCancelOpen] = useState<boolean>(false);
+    const [isModalConfirmOpen, setIsModalConfirmOpen] = useState<boolean>(false);
 
-    const { data: OrdersData } = useSubscription(CHANGE_ORDER_STATUS);
+    const { data: subscriptionOrdersData } = useSubscription(CHANGE_ORDER_STATUS);
     const [getBartenderDataByToken, { data: bartenderData }] = useLazyQuery(GetBartenderDataByToken);
     const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
     const [updateTable] = useMutation(UPDATE_TABLE);
@@ -33,29 +41,67 @@ function BartenderQueue() {
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
-    const setOrderStatus = (id: Number, tableCode: number, newStatus: OrderFilter) => {
-        updateOrder({
+    const selectOrder = (order: Order, option: selectOrderOption) => {
+        setSelectedOrder(order);
+        switch (option) {
+            case selectOrderOption.CONFIRM:
+                setIsModalConfirmOpen(true);
+                break;
+
+            case selectOrderOption.CANCEL:
+                setIsModalCancelOpen(true);
+                break;
+        
+            default:
+                break;
+        }
+    };
+
+    const updateOrderStatus = (option: selectOrderOption) => {
+        selectedOrder && selectedOrder !== null && updateOrder({
             variables: {
                 input: {
-                    id,
-                    bartenderId: bartender?.id,
-                    status: newStatus,
+                    id: selectedOrder.id,
+                    bartenderId: selectedOrder.bartenderId,
+                    status: (() => {
+                        switch (option) {
+                            case selectOrderOption.CONFIRM:
+                                setIsModalConfirmOpen(false);
+                                return 1;
+    
+                            case selectOrderOption.CANCEL:
+                                setIsModalCancelOpen(false);
+                                return 4;
+    
+                            default:
+                                break;
+                        }
+                    })(),
                 },
             },
         }).catch((error) => {
             console.error("Erro ao atualizar o pedido: ", error);
+            setSelectedOrder(null);
         }).then(() => {
-            updateTable({
-                variables: {
-                    input: {
-                        id: "-1",
-                        code: Number(tableCode),
-                        state: true,
-                    },
+            option === selectOrderOption.CANCEL && freeTable(Number(selectedOrder.tableId));
+            setSelectedOrder(null);
+        });
+    };
+
+    const freeTable = (tableId: number) => {
+        updateTable({
+            variables: {
+                input: {
+                    id: tableId,
+                    code: -1,
+                    state: true,
                 },
-            }).catch((error) => {
-                console.error("Erro ao liberar a mesa: ", error);
-            })
+            },
+        }).catch((error) => {
+            console.error("Erro ao liberar a mesa: ", error);
+            setSelectedOrder(null);
+        }).then(() => {
+            setSelectedOrder(null);
         });
     };
 
@@ -117,11 +163,11 @@ function BartenderQueue() {
                 return (
                     <div className='table-options'>
                         <button className={`button confirm ${row.status !== 0 && 'disabled'}`} 
-                            onClick={() => row.status === 0 && setOrderStatus(row.id, row.tableCode, OrderFilter.REDEEMED)}>
+                            onClick={() => row.status === 0 && selectOrder(row, selectOrderOption.CONFIRM)}>
                             Confirmar
                         </button>
                         <button className={`button cancel ${row.status !== 0 && 'disabled'}`}
-                            onClick={() => row.status === 0 && setOrderStatus(row.id, row.tableCode, OrderFilter.CANCELED)}>
+                            onClick={() => row.status === 0 && selectOrder(row, selectOrderOption.CANCEL)}>
                             Cancelar
                         </button>
                     </div>
@@ -209,16 +255,16 @@ function BartenderQueue() {
     }, [bartenderData]);
 
     useEffect(() => { 
-        if (OrdersData) {
+        if (subscriptionOrdersData) {
             setData(
-                (OrdersData?.ChangeOrderStatus || []).map((order: any) => {
+                (subscriptionOrdersData?.ChangeOrderStatus || []).map((order: any) => {
                     return {
                         ...order.data,
                     } as Order;
                 })
             );
         }
-    }, [OrdersData]);
+    }, [subscriptionOrdersData]);
 
     const handleFilterSelect = (newFilterIndex: string) => {
         setFilterIndex(newFilterIndex);
@@ -256,6 +302,20 @@ function BartenderQueue() {
                             )}
                         </div>
                     </div>
+
+                    <Modal 
+                        title={"Deseja realmente cancelar o pedido?"}
+                        isOpen={isModalCancelOpen} 
+                        onClose={() => {setIsModalCancelOpen(false)}} 
+                        onConfirm={() => updateOrderStatus(selectOrderOption.CANCEL)}
+                    />
+
+                    <Modal 
+                        title={"Deseja realmente confirmar o pedido?"}
+                        isOpen={isModalConfirmOpen} 
+                        onClose={() => {setIsModalConfirmOpen(false)}} 
+                        onConfirm={() => updateOrderStatus(selectOrderOption.CONFIRM)}
+                    />
                 </>
             )}
         </>
