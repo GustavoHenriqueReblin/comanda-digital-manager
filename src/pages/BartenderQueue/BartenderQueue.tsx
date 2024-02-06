@@ -99,7 +99,7 @@ function BartenderQueue() {
             variables: {
                 input: {
                     id: selectedOrder.id,
-                    bartenderId: bartender?.id,
+                    bartenderId: bartender?.id ?? selectedOrder.bartenderId,
                     status: (() => {
                         switch (option) {
                             case selectOrderOption.CONFIRM:
