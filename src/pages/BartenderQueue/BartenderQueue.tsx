@@ -5,7 +5,6 @@ import Loading from '../../components/Loading';
 import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
 import Modal from '../../components/Modal/Modal';
-import { FormatDate } from '../../helper';
 import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetOrders } from '../../graphql/queries/order';
@@ -18,6 +17,7 @@ import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
+import { FormatDate } from '../../helper';
 
 function BartenderQueue() {
     enum selectOrderOption {
@@ -40,6 +40,43 @@ function BartenderQueue() {
 
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+
+    const tableOrderColumns = [
+        {
+            id: 1,
+            name: 'Código do pedido',
+            field: 'id',
+        },
+        {
+            id: 2,
+            name: 'Código da mesa',
+            field: 'tableCode',
+        },
+        {
+            id: 3,
+            name: 'Valor total',
+            field: 'value',
+        },
+        {
+            id: 4,
+            name: 'Data',
+            field: 'date',
+        },
+        {
+            id: 5,
+            name: 'Status',
+            field: 'statusName',
+        },
+        {
+            id: 6,
+            name: 'Opções',
+            field: 'null',
+        },
+    ];
+
+    const handleFilterSelect = (newFilterIndex: string) => {
+        setFilterIndex(newFilterIndex);
+    };
 
     const selectOrder = (order: Order, option: selectOrderOption) => {
         setSelectedOrder(order);
@@ -105,98 +142,26 @@ function BartenderQueue() {
         });
     };
 
-    const tableOrderColumns = [
-        {
-            name: 'Código do pedido',
-            selector: (row: any) => row.id,
-            width: "180px"  
-        },
-        {
-            name: 'Código da mesa',
-            selector: (row: any) => row.tableCode,
-            width: "190px"  
-        },
-        {
-            name: 'Valor total',
-            selector: (row: any) => {
-                return Number(row.value).toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                });
-            },
-            width: "160px",
-        },
-        {
-            name: 'Data',
-            selector: (row: any) => {return FormatDate(row.date)},
-            width: "160px"  
-        },
-        {
-            name: 'Status',
-            selector: (row: any) => {
-                switch (row.status) {
-                    case OrderFilter.COMPLETED:
-                        return OrderFilterOptions[OrderFilter.COMPLETED].description;
+    const getOrderStatusName = (status: OrderFilter) => {
+        switch (status) {
+            case OrderFilter.COMPLETED:
+                return OrderFilterOptions[OrderFilter.COMPLETED].description;
 
-                    case OrderFilter.REDEEMED:
-                        return OrderFilterOptions[OrderFilter.REDEEMED].description;
+            case OrderFilter.REDEEMED:
+                return OrderFilterOptions[OrderFilter.REDEEMED].description;
 
-                    case OrderFilter.CONFIRMED:
-                        return OrderFilterOptions[OrderFilter.CONFIRMED].description;
+            case OrderFilter.CONFIRMED:
+                return OrderFilterOptions[OrderFilter.CONFIRMED].description;
 
-                    case OrderFilter.FINISHED:
-                        return OrderFilterOptions[OrderFilter.FINISHED].description;
+            case OrderFilter.FINISHED:
+                return OrderFilterOptions[OrderFilter.FINISHED].description;
 
-                    case OrderFilter.CANCELED:
-                        return OrderFilterOptions[OrderFilter.CANCELED].description;
-                
-                    default:
-                        break;
-                }
-                
-            },
-            width: "140px"  
-        },
-        {
-            name: 'Opções',
-            selector: (row: any) => {
-                return (
-                    <div className='table-options'>
-                        <button className={`button confirm ${row.status !== 0 && 'disabled'}`} 
-                            onClick={() => row.status === 0 && selectOrder(row, selectOrderOption.CONFIRM)}>
-                            Confirmar
-                        </button>
-                        <button className={`button cancel ${row.status !== 0 && 'disabled'}`}
-                            onClick={() => row.status === 0 && selectOrder(row, selectOrderOption.CANCEL)}>
-                            Cancelar
-                        </button>
-                    </div>
-                )
-            },
-        },
-    ];
-
-    const tableOrderStyle = {
-        headRow: {
-            style: {
-                borderRadius: "4px",
-                backgroundColor: "#b6cde0",
-                border: 'none',
-                marginBottom: '6px',
-            }
-        },
-        headCells: {
-            style: {
-                fontSize: "18px",
-                fontWeight: "900",
-                cursor: 'pointer',
-            }
-        },
-        rows: {
-            style: {
-                fontSize: "16px",
-            }
-        },
+            case OrderFilter.CANCELED:
+                return OrderFilterOptions[OrderFilter.CANCELED].description;
+        
+            default:
+                break;
+        }
     };
 
     useEffect(() => { 
@@ -226,7 +191,18 @@ function BartenderQueue() {
                             variables: { input: { status: [0,1,2,3,4] } },
                         })
                             .then(res => {
-                                resolve(res.data.orders);
+                                const resData = (res.data.orders || []).map((order: any) => {
+                                    return {
+                                        ...order,
+                                        value: Number(order.value).toLocaleString('pt-BR', {
+                                            style: 'currency',
+                                            currency: 'BRL',
+                                        }),
+                                        date: FormatDate(order.date),
+                                        statusName: getOrderStatusName(order.status)
+                                    } as Order;
+                                });
+                                resolve(resData);
                             })
                             .catch(error => {
                                 reject(error);
@@ -259,16 +235,13 @@ function BartenderQueue() {
             setData(
                 (subscriptionOrdersData?.ChangeOrderStatus || []).map((order: any) => {
                     return {
-                        ...order.data,
+                        ...order,
+                        statusName: getOrderStatusName(order.status)
                     } as Order;
                 })
             );
         }
     }, [subscriptionOrdersData]);
-
-    const handleFilterSelect = (newFilterIndex: string) => {
-        setFilterIndex(newFilterIndex);
-    };
 
     return (
         <>
@@ -288,18 +261,14 @@ function BartenderQueue() {
                             />
                         </div>
                         <div className="queue-main">
-                            { data && data.length > 0 ? (
-                                <CustomDataTable
-                                    columns={tableOrderColumns}
-                                    data={data.filter((order) => order.status === Number(filterIndex))}
-                                    customStyles={tableOrderStyle}
-                                    noDataMessage='Sem pedidos com o status selecionado :('
-                                    defaultSortFieldId={2}
-                                    defaultSortAsc
-                                ></CustomDataTable>
-                            ) : (
-                                <></>
-                            )}
+                            <CustomDataTable
+                                columns={tableOrderColumns}
+                                data={data?.filter((order) => order.status === Number(filterIndex))}
+                                noDataMessage='Sem pedidos com o status selecionado :('
+                                buttonsOptions={true}
+                                onConfirm={(order) => {console.log("Confirmou", order)}}
+                                onCancel={(order) => {console.log("Cancelou", order)}}
+                            ></CustomDataTable>
                         </div>
                     </div>
 
