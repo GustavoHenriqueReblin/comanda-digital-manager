@@ -25,6 +25,7 @@ export type OrderItems = {
 export type Order = {
     id: number,
     bartenderId: number,
+    bertenderName: string,
     tableId: number,
     value: number,
     date: Date,
@@ -51,11 +52,11 @@ export enum OrderFilter {
 };
 
 export const OrderFilterOptions = [
-    { id: 1, description: "Concluídos", value: OrderFilter.COMPLETED },
-    { id: 2, description: "Resgatados", value: OrderFilter.REDEEMED },
-    { id: 3, description: "Confirmados", value: OrderFilter.CONFIRMED },
-    { id: 4, description: "Finalizados", value: OrderFilter.FINISHED },
-    { id: 5, description: "Cancelados", value: OrderFilter.CANCELED },
+    { id: 1, singularDescription: "Concluído", description: "Concluídos", value: OrderFilter.COMPLETED },
+    { id: 2, singularDescription: "Resgatado", description: "Resgatados", value: OrderFilter.REDEEMED },
+    { id: 3, singularDescription: "Confirmado", description: "Confirmados", value: OrderFilter.CONFIRMED },
+    { id: 4, singularDescription: "Finalizado", description: "Finalizados", value: OrderFilter.FINISHED },
+    { id: 5, singularDescription: "Cancelado", description: "Cancelados", value: OrderFilter.CANCELED },
 ];
 
 export const routeTitles: Record<string, string> = {

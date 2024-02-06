@@ -6,6 +6,7 @@ export const UPDATE_ORDER = gql`
             data {
                 id
                 bartenderId
+                bertenderName
                 tableId
                 tableCode
                 value

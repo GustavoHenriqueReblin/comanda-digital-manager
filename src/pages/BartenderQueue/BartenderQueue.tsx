@@ -44,12 +44,12 @@ function BartenderQueue() {
     const tableOrderColumns = [
         {
             id: 1,
-            name: 'Código do pedido',
+            name: 'Cód. do pedido',
             field: 'id',
         },
         {
             id: 2,
-            name: 'Código da mesa',
+            name: 'Cód. da mesa',
             field: 'tableCode',
         },
         {
@@ -64,11 +64,16 @@ function BartenderQueue() {
         },
         {
             id: 5,
+            name: 'Garçom',
+            field: 'bertenderName',
+        },
+        {
+            id: 6,
             name: 'Status',
             field: 'statusName',
         },
         {
-            id: 6,
+            id: 7,
             name: 'Opções',
             field: 'null',
         },
@@ -100,6 +105,7 @@ function BartenderQueue() {
                 input: {
                     id: selectedOrder.id,
                     bartenderId: bartender?.id ?? selectedOrder.bartenderId,
+                    bertenderName: bartender?.name ?? '',
                     status: (() => {
                         switch (option) {
                             case selectOrderOption.CONFIRM:
@@ -145,19 +151,19 @@ function BartenderQueue() {
     const getOrderStatusName = (status: OrderFilter) => {
         switch (status) {
             case OrderFilter.COMPLETED:
-                return OrderFilterOptions[OrderFilter.COMPLETED].description;
+                return OrderFilterOptions[OrderFilter.COMPLETED].singularDescription;
 
             case OrderFilter.REDEEMED:
-                return OrderFilterOptions[OrderFilter.REDEEMED].description;
+                return OrderFilterOptions[OrderFilter.REDEEMED].singularDescription;
 
             case OrderFilter.CONFIRMED:
-                return OrderFilterOptions[OrderFilter.CONFIRMED].description;
+                return OrderFilterOptions[OrderFilter.CONFIRMED].singularDescription;
 
             case OrderFilter.FINISHED:
-                return OrderFilterOptions[OrderFilter.FINISHED].description;
+                return OrderFilterOptions[OrderFilter.FINISHED].singularDescription;
 
             case OrderFilter.CANCELED:
-                return OrderFilterOptions[OrderFilter.CANCELED].description;
+                return OrderFilterOptions[OrderFilter.CANCELED].singularDescription;
         
             default:
                 break;

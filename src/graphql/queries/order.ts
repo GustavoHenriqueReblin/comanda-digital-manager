@@ -5,6 +5,7 @@ export const GetOrders = gql`
         orders(input: $input) {
             id
             bartenderId
+            bertenderName
             tableId
             tableCode
             value
