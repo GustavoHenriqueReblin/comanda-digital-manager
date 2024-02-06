@@ -235,8 +235,13 @@ function BartenderQueue() {
             setData(
                 (subscriptionOrdersData?.ChangeOrderStatus || []).map((order: any) => {
                     return {
-                        ...order,
-                        statusName: getOrderStatusName(order.status)
+                        ...order.data,
+                        value: Number(order.data.value).toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                        }),
+                        date: FormatDate(order.data.date),
+                        statusName: getOrderStatusName(order.data.status)
                     } as Order;
                 })
             );
@@ -266,8 +271,8 @@ function BartenderQueue() {
                                 data={data?.filter((order) => order.status === Number(filterIndex))}
                                 noDataMessage='Sem pedidos com o status selecionado :('
                                 buttonsOptions={true}
-                                onConfirm={(order) => {console.log("Confirmou", order)}}
-                                onCancel={(order) => {console.log("Cancelou", order)}}
+                                onConfirm={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CONFIRM) }}
+                                onCancel={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CANCEL) }}
                             ></CustomDataTable>
                         </div>
                     </div>
