@@ -33,6 +33,12 @@ export type Order = {
     items: [OrderItems],
 };
 
+export type NavBarItem = {
+    type: NavBarItemsType,
+    description: string,
+    icon: React.ReactNode | undefined,
+};
+
 export enum TypeRedirect {
     ADMIN,
     ROOT
@@ -49,6 +55,12 @@ export enum OrderFilter {
     CONFIRMED,
     FINISHED,
     CANCELED
+};
+
+export enum NavBarItemsType {
+    HOME,
+    PRODUCTS,
+    BARTENDERS
 };
 
 export const OrderFilterOptions = [

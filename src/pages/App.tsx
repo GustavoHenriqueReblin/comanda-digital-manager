@@ -24,7 +24,6 @@ function App() {
   return (
     <BrowserRouter>
       <ResponsiveProvider>
-        <Header />
         <Routes>
           <Route 
             path='/admin' element={

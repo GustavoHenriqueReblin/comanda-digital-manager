@@ -5,6 +5,7 @@ import Loading from '../../components/Loading';
 import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
 import Modal from '../../components/Modal/Modal';
+import Header from '../../components/Header/Header';
 import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetOrders } from '../../graphql/queries/order';
@@ -263,23 +264,26 @@ function BartenderQueue() {
                     <Helmet>
                         <title>{pageTitle}</title>
                     </Helmet>
-                    <div className="queue-container">
-                        <div className="queue-header">
-                            <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>
-                            <CustomSelect 
-                                options={OrderFilterOptions} 
-                                onClickFilter={handleFilterSelect}
-                            />
-                        </div>
-                        <div className="queue-main">
-                            <CustomDataTable
-                                columns={tableOrderColumns}
-                                data={data?.filter((order) => order.status === Number(filterIndex))}
-                                noDataMessage='Sem pedidos com o status selecionado :('
-                                buttonsOptions={true}
-                                onConfirm={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CONFIRM) }}
-                                onCancel={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CANCEL) }}
-                            ></CustomDataTable>
+                    <div className='main-content'>
+                        <Header />
+                        <div className="queue-container">
+                            <div className="queue-header">
+                                <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>
+                                <CustomSelect 
+                                    options={OrderFilterOptions} 
+                                    onClickFilter={handleFilterSelect}
+                                />
+                            </div>
+                            <div className="queue-main">
+                                <CustomDataTable
+                                    columns={tableOrderColumns}
+                                    data={data?.filter((order) => order.status === Number(filterIndex))}
+                                    noDataMessage='Sem pedidos com o status selecionado :('
+                                    buttonsOptions={true}
+                                    onConfirm={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CONFIRM) }}
+                                    onCancel={(order) => { order.status === 0 && selectOrder(order, selectOrderOption.CANCEL) }}
+                                ></CustomDataTable>
+                            </div>
                         </div>
                     </div>
 

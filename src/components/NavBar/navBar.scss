@@ -1,0 +1,32 @@
+@import '../../variables.scss';
+
+.navbar-container {
+    height: 100%;
+    width: 96px;
+    padding: 48px 0px;
+    background-color: $bg-color;
+    transition: width 0.3s ease-in-out;
+    color: $text-color;
+    cursor: pointer;
+
+    &.expanded {
+        width: 280px;
+        transition: width 0.2s ease-in-out;
+    }
+
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: xx-large;
+        margin-bottom: 36px;
+        cursor: pointer;
+    }
+
+    .list {
+        width: auto;
+        display: flex;
+        flex-direction: column;
+        height: fit-content;
+    }
+}

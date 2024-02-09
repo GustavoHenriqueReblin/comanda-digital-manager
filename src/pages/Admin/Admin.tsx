@@ -2,8 +2,10 @@
 import './admin.scss';
 
 import Loading from "../../components/Loading";
+import NavBar from '../../components/NavBar/NavBar';
+import Header from '../../components/Header/Header';
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
-import { routeTitles } from "../../types/types";
+import { NavBarItem, NavBarItemsType, routeTitles } from "../../types/types";
 import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
@@ -13,6 +15,9 @@ import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { Helmet } from "react-helmet";
+import { GoHomeFill } from "react-icons/go";
+import { MdFastfood } from "react-icons/md";
+import { FaUserAlt } from "react-icons/fa";
 
 function Admin() {
     const [loading, setLoading] = useState<Boolean>(true);
@@ -82,6 +87,12 @@ function Admin() {
         }
     }, [authResponseData]);
 
+    const navBarItems: NavBarItem[] = [
+        { type: NavBarItemsType.HOME, description: 'Home', icon: <GoHomeFill /> },
+        { type: NavBarItemsType.PRODUCTS, description: 'Produtos', icon: <MdFastfood /> },
+        { type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
+    ];
+
     return (
         <>
             { loading 
@@ -91,18 +102,23 @@ function Admin() {
                     <Helmet>
                         <title>{pageTitle}</title>
                     </Helmet>
-                    <div className="card-container">
-                        { isVisible && data && Array.isArray(data) ? (
-                            data.map((bartender: any) => (
-                                <BartenderAuthCard
-                                    key={bartender.id}
-                                    bartender={bartender}
-                                    sendResponseAuthReq={sendResponseAuthReq}
-                                />
-                            ))
-                        ) : (
-                            <></>
-                        )}
+                    <NavBar items={navBarItems}  />
+
+                    <div className='main-content'>
+                        <Header />
+                        <div className="card-container">
+                            { isVisible && data && Array.isArray(data) ? (
+                                data.map((bartender: any) => (
+                                    <BartenderAuthCard
+                                        key={bartender.id}
+                                        bartender={bartender}
+                                        sendResponseAuthReq={sendResponseAuthReq}
+                                    />
+                                ))
+                            ) : (
+                                <></>
+                            )}
+                        </div>
                     </div>
                 </>
             )}

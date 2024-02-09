@@ -115,25 +115,28 @@ input {
     align-items: center;
     overflow-y: scroll;
 
-    @media screen and (min-width: 1px) {
-        padding: 0 10px 0 10px;
-    }
+    .container {
+        height: 100%;
+        width: 100%;
+        max-width: 1920px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
 
-    @media screen and (min-width: 548px) {
-        padding: 0 20px 0 20px;
-    }
+        .main-content {
+            width: 100%;
+            @media screen and (min-width: 1px) {
+                padding: 0 10px 0 10px;
+            }
 
-    @media screen and (min-width: 1024px) {
-        padding: 0 80px 0 80px;
-    }
-}
+            @media screen and (min-width: 548px) {
+                padding: 0 20px 0 20px;
+            }
 
-.container {
-    height: 100%;
-    width: 100%;
-    max-width: 1534px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+            @media screen and (min-width: 1024px) {
+                padding: 0 80px 0 80px;
+            }
+        }
+    }
 }

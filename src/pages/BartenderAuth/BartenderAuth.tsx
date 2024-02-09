@@ -2,6 +2,7 @@
 import './bartenderAuth.scss';
 
 import Loading from "../../components/Loading";
+import Header from '../../components/Header/Header';
 import { routeTitles } from "../../types/types";
 import { GetBartender } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
@@ -165,30 +166,35 @@ function BartenderAuth() {
             { loading 
             ? ( <Loading title="Aguarde, carregando..." /> ) 
             : (
-                <form className="bartender-container" onSubmit={handleSubmit(validateBartenderCode)}>
+                <>
                     <Helmet>
                         <title>{pageTitle}</title>
                     </Helmet>
-                    <label className='label-input'>Seu código de segurança:</label>
-                    <input
-                        className='input'
-                        type="text"
-                        aria-label="securityCode input"
-                        placeholder="Código de garçom"
-                        {...register('securityCode')}
-                        disabled={isInputBlocked}
-                    />
-                    {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
-                    {resMessage !== '' && <span className='error-input'>{resMessage}</span>}
-                    { bartenderDataIsWaiting
-                    ? (
-                        <>
-                            <label className='label-input'>Aguardando aprovação...</label>
-                            <button onClick={() => cancelRequestWait(true)} className='button' type="button">Cancelar</button>
-                        </>
-                    ) 
-                    : (<button className='button' type="submit">Enviar</button>)}
-                </form>
+                    <div className='main-content'>
+                        <Header />
+                        <form className="bartender-container" onSubmit={handleSubmit(validateBartenderCode)}>
+                            <label className='label-input'>Seu código de segurança:</label>
+                            <input
+                                className='input'
+                                type="text"
+                                aria-label="securityCode input"
+                                placeholder="Código de garçom"
+                                {...register('securityCode')}
+                                disabled={isInputBlocked}
+                            />
+                            {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
+                            {resMessage !== '' && <span className='error-input'>{resMessage}</span>}
+                            { bartenderDataIsWaiting
+                            ? (
+                                <>
+                                    <label className='label-input'>Aguardando aprovação...</label>
+                                    <button onClick={() => cancelRequestWait(true)} className='button' type="button">Cancelar</button>
+                                </>
+                            ) 
+                            : (<button className='button' type="submit">Enviar</button>)}
+                        </form>
+                    </div>
+                </>
             )}
         </>
     )
