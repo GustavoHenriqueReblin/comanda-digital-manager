@@ -1,20 +1,22 @@
 import './navBarItem.scss';
 import React from "react";
+import { NavBarItemsType } from '../../../types/types';
 
 interface NavBarItemProps {
+    type: NavBarItemsType;
     icon: React.ReactNode;
     isSelected: boolean;
     showDescription: boolean;
     description: string;
-    onClick: () => void;
+    onClick: (itemClicked: NavBarItemsType) => void;
 };
 
-function NavBarItem({icon, isSelected, showDescription, description, onClick}: NavBarItemProps) {
+function NavBarItem({type, icon, isSelected, showDescription, description, onClick}: NavBarItemProps) {
     return (
         <>
             <li
                 className={`item ${isSelected && 'selected'} ${showDescription && 'navbar-expanded'}`}
-                onClick={() => {onClick()}} 
+                onClick={() => {onClick(type)}} 
             >
                 <span className='icon-container'>
                     {icon}

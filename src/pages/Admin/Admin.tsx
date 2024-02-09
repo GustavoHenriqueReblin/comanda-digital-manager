@@ -5,19 +5,17 @@ import Loading from "../../components/Loading";
 import NavBar from '../../components/NavBar/NavBar';
 import Header from '../../components/Header/Header';
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
-import { NavBarItem, NavBarItemsType, routeTitles } from "../../types/types";
+import { NavBarItemsType, routeTitles } from "../../types/types";
+import { useAdminContext } from '../../contexts/AdminContext';
 import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { Helmet } from "react-helmet";
-import { GoHomeFill } from "react-icons/go";
-import { MdFastfood } from "react-icons/md";
-import { FaUserAlt } from "react-icons/fa";
 
 function Admin() {
     const [loading, setLoading] = useState<Boolean>(true);
@@ -28,7 +26,9 @@ function Admin() {
     const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const location = useLocation();
+    const navigate = useNavigate();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const { adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected } = useAdminContext();
 
     const sendResponseAuthReq = (bartender: any, approved: boolean) => {
         updateBartender({ variables: {
@@ -65,6 +65,7 @@ function Admin() {
             : fetchBartendersAreWaiting()
                 .then(data => {
                     setData(data);
+                    setAdminItemNavBarSelected(adminNavBarItems[0].type);
                     setLoading(false);
                 })
                 .catch(error => {
@@ -87,11 +88,20 @@ function Admin() {
         }
     }, [authResponseData]);
 
-    const navBarItems: NavBarItem[] = [
-        { type: NavBarItemsType.HOME, description: 'Home', icon: <GoHomeFill /> },
-        { type: NavBarItemsType.PRODUCTS, description: 'Produtos', icon: <MdFastfood /> },
-        { type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
-    ];
+    const redirectPageNavBar = (type: NavBarItemsType) => {
+        switch (type) {
+            case NavBarItemsType.HOME:
+                navigate('/admin');
+                break;
+
+            case NavBarItemsType.PRODUCTS:
+                navigate('/admin/products');
+                break;
+        
+            default:
+                break;
+        }
+    };
 
     return (
         <>
@@ -102,7 +112,12 @@ function Admin() {
                     <Helmet>
                         <title>{pageTitle}</title>
                     </Helmet>
-                    <NavBar items={navBarItems}  />
+                    <NavBar 
+                        items={adminNavBarItems}
+                        itemSelected={adminItemNavBarSelected}
+                        setItemSelected={setAdminItemNavBarSelected}  
+                        redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
+                    ></NavBar>
 
                     <div className='main-content'>
                         <Header />

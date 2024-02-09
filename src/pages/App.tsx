@@ -1,13 +1,18 @@
 import Login from './Login/Login';
 import Admin from './Admin/Admin';
+import Products from './Admin/Products/Products';
+import ResponsiveProvider from "../components/ResponsiveProvider";
 import Bartender from './BartenderAuth/BartenderAuth';
 import BartenderQueue from './BartenderQueue/BartenderQueue';
-import ResponsiveProvider from "../components/ResponsiveProvider";
-import Header from "../components/Header/Header";
+import { NavBarItem, NavBarItemsType } from '../types/types';
+import { AdminContext } from '../contexts/AdminContext';
 
-import React from "react";
+import React, { useState } from "react";
 import Cookies from 'js-cookie';
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { GoHomeFill } from "react-icons/go";
+import { MdFastfood } from "react-icons/md";
+import { FaUserAlt } from "react-icons/fa";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -20,7 +25,15 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, redirectTo, cooki
   return isAuthenticated ? <>{children}</> : <Navigate to={redirectTo} />;
 }
 
+const adminNavBarItems: NavBarItem[] = [
+  { type: NavBarItemsType.HOME, description: 'Home', icon: <GoHomeFill /> },
+  { type: NavBarItemsType.PRODUCTS, description: 'Produtos', icon: <MdFastfood /> },
+  { type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
+];
+
 function App() {
+  const [adminItemNavBarSelected, setAdminItemNavBarSelected] = useState<NavBarItemsType>(adminNavBarItems[0].type);
+
   return (
     <BrowserRouter>
       <ResponsiveProvider>
@@ -28,7 +41,22 @@ function App() {
           <Route 
             path='/admin' element={
               <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
-                <Admin />
+                <AdminContext.Provider value={{
+                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected
+                }}>
+                  <Admin /> 
+                </AdminContext.Provider>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path='/admin/products' element={
+              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
+                <AdminContext.Provider value={{
+                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected
+                }}>
+                  <Products text='Testando' /> 
+                </AdminContext.Provider>
               </PrivateRoute>
             } 
           />

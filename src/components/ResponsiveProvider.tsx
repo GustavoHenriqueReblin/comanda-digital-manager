@@ -1,16 +1,20 @@
 import '../global.scss';
 import React from "react";
 
-function ResponsiveProvider({ children }: any) {
-    return (
-      <>
-        <div className="page">
-          <div className="container">
-            { children }
-          </div>
+interface ResponsiveProviderProps {
+  children: React.ReactNode;
+};
+
+function ResponsiveProvider({ children }: ResponsiveProviderProps) {
+  return (
+    <>
+      <div className="page">
+        <div className="container">
+          { children }
         </div>
-      </>
-    );
-  }
+      </div>
+    </>
+  );
+}
     
-  export default ResponsiveProvider;
+export default ResponsiveProvider;
