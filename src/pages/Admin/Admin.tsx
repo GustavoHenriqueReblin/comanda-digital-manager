@@ -105,21 +105,21 @@ function Admin() {
 
     return (
         <>
-            { loading 
-            ? (<Loading title="Aguarde, carregando..." />) 
-            : (
-                <>
-                    <Helmet>
-                        <title>{pageTitle}</title>
-                    </Helmet>
-                    <NavBar 
-                        items={adminNavBarItems}
-                        itemSelected={adminItemNavBarSelected}
-                        setItemSelected={setAdminItemNavBarSelected}  
-                        redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
-                    ></NavBar>
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
+            <NavBar 
+                items={adminNavBarItems}
+                itemSelected={adminItemNavBarSelected}
+                setItemSelected={setAdminItemNavBarSelected}  
+                redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
+            ></NavBar>
 
-                    <div className='main-content'>
+            <div className='main-content'>
+                { loading 
+                ? (<Loading title="Aguarde, carregando..." />) 
+                : (
+                    <>
                         <Header />
                         <div className="card-container">
                             { isVisible && data && Array.isArray(data) ? (
@@ -134,9 +134,9 @@ function Admin() {
                                 <></>
                             )}
                         </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )}
+            </div>
         </>
     );
 }

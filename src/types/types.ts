@@ -73,7 +73,8 @@ export const OrderFilterOptions = [
 
 export const routeTitles: Record<string, string> = {
     '/': 'Comanda digital - Página Inicial',
-    '/admin': 'Comanda digital - Área do ADMIN',
+    '/admin': 'Comanda digital - Painel',
     '/queue': 'Comanda digital - Seus pedidos',
     '/login': 'Comanda digital - Login',
+    '/admin/products': 'Comanda digital - Produtos',
 };

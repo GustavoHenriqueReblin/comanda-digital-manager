@@ -1,16 +1,25 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import './products.scss';
+
+import Header from "../../../components/Header/Header";
+import Loading from "../../../components/Loading";
 import NavBar from "../../../components/NavBar/NavBar";
 import { useAdminContext } from "../../../contexts/AdminContext";
-import { NavBarItemsType } from "../../../types/types";
+import { NavBarItemsType, routeTitles } from "../../../types/types";
+
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 interface ProductsProps {
     text: string;
 };
 
 function Products({ text }: ProductsProps) {
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState<Boolean>(true);
     const { adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected } = useAdminContext();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
 
     const redirectPageNavBar = (type: NavBarItemsType) => {
         switch (type) {
@@ -27,15 +36,34 @@ function Products({ text }: ProductsProps) {
         }
     };
 
+    useEffect(() => {
+        setAdminItemNavBarSelected(adminNavBarItems[1].type);
+        setLoading(false);    
+    });
+
     return (
         <>
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
             <NavBar 
                 items={adminNavBarItems}
                 itemSelected={adminItemNavBarSelected}
                 setItemSelected={setAdminItemNavBarSelected}  
                 redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
             ></NavBar>
-            <span>{ text }</span>
+
+            <div className='main-content'>
+                { loading 
+                ? (<Loading title="Aguarde, carregando..." />) 
+                : (
+                    <>
+                        <Header />
+                        <span>{ text }</span>
+                    </>
+                )}
+            </div>
+            
         </>
     )
 }
