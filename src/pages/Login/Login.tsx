@@ -1,7 +1,7 @@
 import '../../global.scss';
 import './login.scss';
 import Loading from '../../components/Loading';
-import { routeTitles } from '../../types/types';
+import { routes } from '../../types/types';
 import { GetUser } from '../../graphql/queries/user';
 
 import React, { useEffect, useState } from 'react';
@@ -32,7 +32,8 @@ function Login() {
   const [getUser, { data }] = useLazyQuery(GetUser);
   const navigate = useNavigate();
   const location = useLocation();
-  const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+  const currentPage = routes.find(page => page.route === location.pathname);
+  const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
   // Ao dar o refetch no usuário verifica os dados
   useEffect(() => {

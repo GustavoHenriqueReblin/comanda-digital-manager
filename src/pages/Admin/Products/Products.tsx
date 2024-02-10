@@ -4,7 +4,7 @@ import Header from "../../../components/Header/Header";
 import Loading from "../../../components/Loading";
 import NavBar from "../../../components/NavBar/NavBar";
 import { useAdminContext } from "../../../contexts/AdminContext";
-import { NavBarItemsType, routeTitles } from "../../../types/types";
+import { NavBarItemsType, routes } from "../../../types/types";
 
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,7 +18,8 @@ function Products({ text }: ProductsProps) {
     const [loading, setLoading] = useState<Boolean>(true);
     const navigate = useNavigate();
     const location = useLocation();
-    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
     const { 
         adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 

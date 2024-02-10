@@ -12,7 +12,6 @@ import Cookies from 'js-cookie';
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { GoHomeFill } from "react-icons/go";
 import { MdFastfood } from "react-icons/md";
-import { FaUserAlt } from "react-icons/fa";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -32,7 +31,7 @@ const adminNavBarItems: NavBarItem[] = [
 ];
 
 function App() {
-  const [adminItemNavBarSelected, setAdminItemNavBarSelected] = useState<NavBarItemsType>(adminNavBarItems[0].type);
+  const [adminItemNavBarSelected, setAdminItemNavBarSelected] = useState<NavBarItemsType | null>(null);
   const [isAdminNavBarExpanded, setIsAdminNavBarExpanded] = useState<boolean>(false);
 
   return (

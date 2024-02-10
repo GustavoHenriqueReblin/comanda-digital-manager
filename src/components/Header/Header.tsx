@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import './header.scss';
 import Modal from "../Modal/Modal";
-import { TypeOfGet, TypeRedirect } from '../../types/types';
+import { routes, TypeOfGet, TypeRedirect } from '../../types/types';
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetIdByToken } from '../../graphql/queries/user';
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLazyQuery, useMutation } from "@apollo/client";
+import { CgProfile } from "react-icons/cg";
 
 function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -20,13 +21,15 @@ function Header() {
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const [updateUser] = useMutation(UPDATE_USER);
     const [getBartenderDataByToken] = useLazyQuery(GetBartenderDataByToken);
-    const [getIdByToken] = useLazyQuery(GetIdByToken);
+    const [getIdByTokenQuery] = useLazyQuery(GetIdByToken);
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageName = currentPage ? currentPage.name : 'Comanda digital';
 
     const redirectTo = (typeRedirect: TypeRedirect) => {
         typeRedirect === TypeRedirect.ADMIN ? navigate('/admin') : navigate('/');
     };
 
-    const getId = (type: TypeOfGet, token?: string) => {
+    const getIdByToken = (type: TypeOfGet, token?: string) => {
         if (type === TypeOfGet.BARTENDER) {
             return new Promise((resolve, reject) => {
                 getBartenderDataByToken({
@@ -41,7 +44,7 @@ function Header() {
             });
         } else {
             return new Promise((resolve, reject) => {
-                getIdByToken({
+                getIdByTokenQuery({
                     variables: { input: { token: token } },
                 })
                     .then(res => {
@@ -60,7 +63,7 @@ function Header() {
             if (cookieName) {
                 const token = Cookies.get(cookieName);
                 Cookies.remove(cookieName);
-                getId(TypeOfGet.BARTENDER, token)
+                getIdByToken(TypeOfGet.BARTENDER, token)
                     .then((data) => {
                         if (data && data !== null && Number(data) > 0) {
                             updateBartender({
@@ -87,7 +90,7 @@ function Header() {
             if (cookieName) {
                 const token = Cookies.get(cookieName); 
                 Cookies.remove(cookieName);
-                getId(TypeOfGet.USER, token)
+                getIdByToken(TypeOfGet.USER, token)
                     .then((data) => {
                         if (data && data !== null && Number(data) > 0) {
                             updateUser({
@@ -113,33 +116,66 @@ function Header() {
     };
 
     useEffect(() => { 
-        const cookieBartenderName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-        const bartender = Cookies.get(cookieBartenderName ? cookieBartenderName : '');  
-        const cookieUserName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-        const user = Cookies.get(cookieUserName ? cookieUserName : ''); 
+        if (!isLoggedIn) {
+            const cookieBartenderName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+            const bartenderToken = Cookies.get(cookieBartenderName ? cookieBartenderName : '');
+            const cookieUserName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+            const userToken = Cookies.get(cookieUserName ? cookieUserName : '');  
 
-        const hasBartenderLoggedIn = !!bartender && location.pathname === '/queue';
-        const hasUserLoggedIn = !!user && location.pathname === '/admin';
+            const validateToken = async (type: TypeOfGet, id: number) => {
+                const isValidToken = Number(id) > 0;
+                if (isValidToken) {
+                    setIsLoggedIn(true);
+                } else {
+                    switch (type) {
+                        case TypeOfGet.USER:
+                            cookieUserName && Cookies.remove(cookieUserName);
+                            navigate('/login');
+                            break;
 
-        setIsLoggedIn(hasBartenderLoggedIn || hasUserLoggedIn); 
-    });
+                        case TypeOfGet.BARTENDER:
+                            cookieBartenderName && Cookies.remove(cookieBartenderName);
+                            navigate('/');
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                }
+            };
+
+            if (location.pathname === '/admin') {
+                getIdByToken(TypeOfGet.USER, userToken)
+                    .then((res) => {validateToken(TypeOfGet.USER, Number(res))});
+            } else if (location.pathname === '/queue') {
+                getIdByToken(TypeOfGet.BARTENDER, bartenderToken)
+                    .then((res) => {validateToken(TypeOfGet.BARTENDER, Number(res))});
+            }
+        }
+    }, [isLoggedIn]);
 
     return (
         <>
-            <div className="header">
-                <div className="logo">
+            <div className='header'>
+                <div className='page-info'>
+                    <h2 className='title'>{ pageName }</h2>
+                    <span className='name'>Carlota’s Kuchen Haus</span>
+                </div>
+                <div className='user-info'>
+                    <span className='icon'><CgProfile /></span>
+                </div>
+
+                {/* <div className="logo">
                     <span onClick={() => redirectTo(TypeRedirect.ROOT)} className="title">Carlota’s Kuchen Haus
                         <div className="line"></div>
                     </span>
                 </div>
                 <div className="menu">
-                    {/* <div onClick={() => redirectTo(TypeRedirect.ADMIN)} className="menu-box">
-                        <h2>ADMIN</h2>
-                    </div> */}
                     {isLoggedIn && (
+                        // Aqui precisa ser o nome do quem logou bonitinho
                         <button onClick={() => setIsModalExitOpen(true)} className='button' type="button">Sair</button>
                     )}
-                </div>
+                </div> */}
             </div>
 
             <Modal 

@@ -8,7 +8,7 @@ import { NavBarItem, NavBarItemsType } from '../../types/types';
 interface NavBarProps {
     items: NavBarItem[];
     itemSelected: NavBarItemsType | null;
-    setItemSelected: React.Dispatch<React.SetStateAction<NavBarItemsType>>;
+    setItemSelected: React.Dispatch<React.SetStateAction<NavBarItemsType | null>>;
     redirect: (typeSelected: NavBarItemsType) => void;
     isExpanded: boolean;
     setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;

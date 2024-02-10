@@ -5,7 +5,7 @@ import Loading from "../../components/Loading";
 import NavBar from '../../components/NavBar/NavBar';
 import Header from '../../components/Header/Header';
 import BartenderAuthCard from "../../components/BartenderAuthCard/BartenderAuthCard";
-import { NavBarItemsType, routeTitles } from "../../types/types";
+import { NavBarItemsType, routes } from "../../types/types";
 import { useAdminContext } from '../../contexts/AdminContext';
 import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
@@ -27,7 +27,8 @@ function Admin() {
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const location = useLocation();
     const navigate = useNavigate();
-    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
     const { 
         adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 

@@ -3,7 +3,7 @@ import './bartenderAuth.scss';
 
 import Loading from "../../components/Loading";
 import Header from '../../components/Header/Header';
-import { routeTitles } from "../../types/types";
+import { routes } from "../../types/types";
 import { GetBartender } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
@@ -38,7 +38,8 @@ function BartenderAuth() {
     });
     const navigate = useNavigate();
     const location = useLocation();
-    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
     const verifyRequstAuthInCookie = (): boolean => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;

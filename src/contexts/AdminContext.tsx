@@ -4,7 +4,7 @@ import { NavBarItem, NavBarItemsType } from "../types/types";
 interface AdminContextProps {
     adminNavBarItems: NavBarItem[] | [];
     adminItemNavBarSelected: NavBarItemsType | null;
-    setAdminItemNavBarSelected: React.Dispatch<React.SetStateAction<NavBarItemsType>>;
+    setAdminItemNavBarSelected: React.Dispatch<React.SetStateAction<NavBarItemsType | null>>;
     isAdminNavBarExpanded: boolean;
     setIsAdminNavBarExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 };

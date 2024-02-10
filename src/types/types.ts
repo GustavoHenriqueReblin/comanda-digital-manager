@@ -39,6 +39,12 @@ export type NavBarItem = {
     icon: React.ReactNode | undefined,
 };
 
+type Page = {
+    route: string;
+    title: string;
+    name: string;
+};
+
 export enum TypeRedirect {
     ADMIN,
     ROOT
@@ -71,10 +77,10 @@ export const OrderFilterOptions = [
     { id: 5, singularDescription: "Cancelado", description: "Cancelados", value: OrderFilter.CANCELED },
 ];
 
-export const routeTitles: Record<string, string> = {
-    '/': 'Comanda digital - Página Inicial',
-    '/admin': 'Comanda digital - Painel',
-    '/queue': 'Comanda digital - Seus pedidos',
-    '/login': 'Comanda digital - Login',
-    '/admin/products': 'Comanda digital - Produtos',
-};
+export const routes: Page[] = [
+    {route: '/', title: 'Comanda digital - Página Inicial', name: 'Página Inicial' },
+    {route: '/admin', title: 'Comanda digital - Painel de controle', name: 'Painel de controle' },
+    {route: '/queue', title: 'Comanda digital - Seus pedidos', name: 'Seus pedidos' },
+    {route: '/login', title: 'Comanda digital - Login', name: 'Login' },
+    {route: '/admin/products', title: 'Comanda digital - Produtos', name: 'Produtos' },
+];

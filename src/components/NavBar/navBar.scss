@@ -7,7 +7,6 @@
     background-color: $bg-color;
     transition: width 0.3s ease-in-out;
     color: $text-color;
-    cursor: pointer;
 
     &.expanded {
         width: 280px;

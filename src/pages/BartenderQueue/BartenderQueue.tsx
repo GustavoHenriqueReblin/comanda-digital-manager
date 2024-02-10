@@ -6,7 +6,7 @@ import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
 import Modal from '../../components/Modal/Modal';
 import Header from '../../components/Header/Header';
-import { Order, OrderFilterOptions, routeTitles, Bartender, OrderFilter } from "../../types/types";
+import { Order, OrderFilterOptions, routes, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
@@ -40,7 +40,8 @@ function BartenderQueue() {
     const [updateOrder] = useMutation(UPDATE_ORDER);
 
     const location = useLocation();
-    const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
     const tableOrderColumns = [
         {
