@@ -5,12 +5,16 @@ interface AdminContextProps {
     adminNavBarItems: NavBarItem[] | [];
     adminItemNavBarSelected: NavBarItemsType | null;
     setAdminItemNavBarSelected: React.Dispatch<React.SetStateAction<NavBarItemsType>>;
+    isAdminNavBarExpanded: boolean;
+    setIsAdminNavBarExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const AdminContext = createContext<AdminContextProps>({
     adminNavBarItems: [],
     adminItemNavBarSelected: null,
     setAdminItemNavBarSelected: () => {},
+    isAdminNavBarExpanded: false,
+    setIsAdminNavBarExpanded: () => {},
 });
   
 export const useAdminContext = () => {

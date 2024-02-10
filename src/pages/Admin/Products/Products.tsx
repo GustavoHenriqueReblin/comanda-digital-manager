@@ -16,10 +16,13 @@ interface ProductsProps {
 
 function Products({ text }: ProductsProps) {
     const [loading, setLoading] = useState<Boolean>(true);
-    const { adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected } = useAdminContext();
     const navigate = useNavigate();
     const location = useLocation();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
+    const { 
+        adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
+        isAdminNavBarExpanded, setIsAdminNavBarExpanded 
+    } = useAdminContext();
 
     const redirectPageNavBar = (type: NavBarItemsType) => {
         switch (type) {
@@ -51,6 +54,8 @@ function Products({ text }: ProductsProps) {
                 itemSelected={adminItemNavBarSelected}
                 setItemSelected={setAdminItemNavBarSelected}  
                 redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
+                isExpanded={isAdminNavBarExpanded}
+                setIsExpanded={setIsAdminNavBarExpanded}
             ></NavBar>
 
             <div className='main-content'>

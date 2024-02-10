@@ -60,7 +60,7 @@ export enum OrderFilter {
 export enum NavBarItemsType {
     HOME,
     PRODUCTS,
-    BARTENDERS
+    //BARTENDERS
 };
 
 export const OrderFilterOptions = [

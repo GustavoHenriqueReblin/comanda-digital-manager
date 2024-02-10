@@ -10,11 +10,11 @@ interface NavBarProps {
     itemSelected: NavBarItemsType | null;
     setItemSelected: React.Dispatch<React.SetStateAction<NavBarItemsType>>;
     redirect: (typeSelected: NavBarItemsType) => void;
+    isExpanded: boolean;
+    setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function NavBar({ items, itemSelected, setItemSelected, redirect }: NavBarProps) {
-    const [isExpanded, setIsExpanded] = useState<boolean>(false);
-
+function NavBar({ items, itemSelected, setItemSelected, redirect, isExpanded, setIsExpanded }: NavBarProps) {
     const navBarItemsMemoized = useMemo(() => {
         return items.map((item) => (
             <NavBarItemComponent

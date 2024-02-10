@@ -28,7 +28,10 @@ function Admin() {
     const location = useLocation();
     const navigate = useNavigate();
     const pageTitle = routeTitles[location.pathname] || 'Comanda digital';
-    const { adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected } = useAdminContext();
+    const { 
+        adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
+        isAdminNavBarExpanded, setIsAdminNavBarExpanded 
+    } = useAdminContext();
 
     const sendResponseAuthReq = (bartender: any, approved: boolean) => {
         updateBartender({ variables: {
@@ -113,6 +116,8 @@ function Admin() {
                 itemSelected={adminItemNavBarSelected}
                 setItemSelected={setAdminItemNavBarSelected}  
                 redirect={(typeClicked) => redirectPageNavBar(typeClicked)}
+                isExpanded={isAdminNavBarExpanded}
+                setIsExpanded={setIsAdminNavBarExpanded}
             ></NavBar>
 
             <div className='main-content'>
@@ -121,6 +126,8 @@ function Admin() {
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (
                     <>
+                        <span>Testando</span>
+
                         <div className="card-container">
                             { isVisible && data && Array.isArray(data) ? (
                                 data.map((bartender: any) => (

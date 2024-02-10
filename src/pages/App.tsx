@@ -28,11 +28,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, redirectTo, cooki
 const adminNavBarItems: NavBarItem[] = [
   { type: NavBarItemsType.HOME, description: 'Home', icon: <GoHomeFill /> },
   { type: NavBarItemsType.PRODUCTS, description: 'Produtos', icon: <MdFastfood /> },
-  { type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
+  //{ type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
 ];
 
 function App() {
   const [adminItemNavBarSelected, setAdminItemNavBarSelected] = useState<NavBarItemsType>(adminNavBarItems[0].type);
+  const [isAdminNavBarExpanded, setIsAdminNavBarExpanded] = useState<boolean>(false);
 
   return (
     <BrowserRouter>
@@ -42,7 +43,8 @@ function App() {
             path='/admin' element={
               <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
                 <AdminContext.Provider value={{
-                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected
+                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
+                  isAdminNavBarExpanded, setIsAdminNavBarExpanded
                 }}>
                   <Admin /> 
                 </AdminContext.Provider>
@@ -53,7 +55,8 @@ function App() {
             path='/admin/products' element={
               <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
                 <AdminContext.Provider value={{
-                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected
+                  adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
+                  isAdminNavBarExpanded, setIsAdminNavBarExpanded
                 }}>
                   <Products text='Testando' /> 
                 </AdminContext.Provider>
