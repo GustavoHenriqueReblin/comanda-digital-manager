@@ -116,11 +116,11 @@ function Admin() {
             ></NavBar>
 
             <div className='main-content'>
+                <Header />
                 { loading 
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (
                     <>
-                        <Header />
                         <div className="card-container">
                             { isVisible && data && Array.isArray(data) ? (
                                 data.map((bartender: any) => (

@@ -54,11 +54,11 @@ function Products({ text }: ProductsProps) {
             ></NavBar>
 
             <div className='main-content'>
+                <Header />
                 { loading 
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (
                     <>
-                        <Header />
                         <span>{ text }</span>
                     </>
                 )}
