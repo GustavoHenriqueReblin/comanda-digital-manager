@@ -260,15 +260,15 @@ function BartenderQueue() {
 
     return (
         <>
-            { loading 
-            ? (<Loading title="Aguarde, carregando..." />) 
-            : (
-                <>
-                    <Helmet>
-                        <title>{pageTitle}</title>
-                    </Helmet>
-                    <div className='main-content'>
-                        <Header Id={bartenderLoggedData?.id} />
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
+            <div className='main-content'>
+                <Header Id={bartenderLoggedData?.id} />
+                { loading 
+                ? (<Loading title="Aguarde, carregando..." />) 
+                : (
+                    <>
                         <div className="queue-container">
                             <div className="queue-header">
                                 <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>
@@ -288,23 +288,23 @@ function BartenderQueue() {
                                 ></CustomDataTable>
                             </div>
                         </div>
-                    </div>
 
-                    <Modal 
-                        title={"Deseja realmente cancelar o pedido?"}
-                        isOpen={isModalCancelOpen} 
-                        onClose={() => {setIsModalCancelOpen(false)}} 
-                        onConfirm={() => updateOrderStatus(selectOrderOption.CANCEL)}
-                    />
+                        <Modal 
+                            title={"Deseja realmente cancelar o pedido?"}
+                            isOpen={isModalCancelOpen} 
+                            onClose={() => {setIsModalCancelOpen(false)}} 
+                            onConfirm={() => updateOrderStatus(selectOrderOption.CANCEL)}
+                        />
 
-                    <Modal 
-                        title={"Deseja realmente confirmar o pedido?"}
-                        isOpen={isModalConfirmOpen} 
-                        onClose={() => {setIsModalConfirmOpen(false)}} 
-                        onConfirm={() => updateOrderStatus(selectOrderOption.CONFIRM)}
-                    />
-                </>
-            )}
+                        <Modal 
+                            title={"Deseja realmente confirmar o pedido?"}
+                            isOpen={isModalConfirmOpen} 
+                            onClose={() => {setIsModalConfirmOpen(false)}} 
+                            onConfirm={() => updateOrderStatus(selectOrderOption.CONFIRM)}
+                        />
+                    </>
+                )}
+            </div>
         </>
     )
 }
