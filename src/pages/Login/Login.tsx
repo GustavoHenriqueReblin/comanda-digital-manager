@@ -35,6 +35,11 @@ function Login() {
   const currentPage = routes.find(page => page.route === location.pathname);
   const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
+  const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+  if (!!(Cookies.get(cookieName ? cookieName : ''))) { // Se já tiver token vai para o admin
+    navigate('/admin');
+  }
+
   // Ao dar o refetch no usuário verifica os dados
   useEffect(() => {
     if (data && data.user != null) {
@@ -48,14 +53,6 @@ function Login() {
 
     setLoading(false);
   }, [data, navigate]);
-
-  // Se já tiver token vai para o admin
-  useEffect(() => {
-    const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-    if (!loading && !!(Cookies.get(cookieName ? cookieName : ''))) {
-      navigate('/admin');
-    }
-  }, [loading, navigate]);
 
   // Ao clicar em entrar
   const validateLogin = (data: LoginFormData) => {
