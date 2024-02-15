@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { Helmet } from "react-helmet";
+import { UPDATE_USER } from '../../graphql/mutations/user';
 
 function Admin() {
     const [loading, setLoading] = useState<Boolean>(true);
@@ -25,6 +26,7 @@ function Admin() {
     const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
     const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
+    const [updateUser] = useMutation(UPDATE_USER);
     const location = useLocation();
     const navigate = useNavigate();
     const currentPage = routes.find(page => page.route === location.pathname);
@@ -107,6 +109,25 @@ function Admin() {
         }
     };
 
+    const exit = () => {
+        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+        if (cookieName) {
+            Cookies.remove(cookieName);
+            updateUser({
+                variables: {
+                    input: {
+                        id: user?.id,
+                        isWaiting: false,
+                        isApproved: false,
+                        token: "",
+                    },
+                },
+            });
+            navigate('/login');
+            window.location.reload();
+        }
+    };
+
     return (
         <>
             <Helmet>
@@ -122,7 +143,11 @@ function Admin() {
             ></NavBar>
 
             <div className='main-content'>
-                <Header Id={user?.id} />
+                <Header 
+                    id={user?.id}
+                    userName={user?.username}
+                    exit={exit}
+                />
                 { loading 
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (

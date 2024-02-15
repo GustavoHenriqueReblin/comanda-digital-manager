@@ -6,20 +6,21 @@ import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
 import CustomSelect from '../../components/CustomSelect/CustomSelect';
 import Modal from '../../components/Modal/Modal';
 import Header from '../../components/Header/Header';
+import { FormatDate } from '../../helper';
 import { Order, OrderFilterOptions, routes, Bartender, OrderFilter } from "../../types/types";
 import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
 import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
 import { UPDATE_TABLE } from '../../graphql/mutations/table';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
+import { UPDATE_BARTENDER } from '../../graphql/mutations/bartender';
 import { useBartenderAuthContext } from '../../contexts/BartenderAuthContext';
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
-import { FormatDate } from '../../helper';
 
 function BartenderQueue() {
     enum selectOrderOption {
@@ -39,7 +40,9 @@ function BartenderQueue() {
     const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
     const [updateTable] = useMutation(UPDATE_TABLE);
     const [updateOrder] = useMutation(UPDATE_ORDER);
+    const [updateBartender] = useMutation(UPDATE_BARTENDER);
 
+    const navigate = useNavigate();
     const location = useLocation();
     const { bartenderData: bartenderLoggedData } = useBartenderAuthContext();
     const currentPage = routes.find(page => page.route === location.pathname);
@@ -174,6 +177,25 @@ function BartenderQueue() {
         }
     };
 
+    const exit = () => {
+        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+        if (cookieName) {
+            Cookies.remove(cookieName);
+            updateBartender({
+                variables: {
+                    input: {
+                        id: bartenderLoggedData?.id,
+                        isWaiting: false,
+                        isApproved: false,
+                        token: "",
+                    },
+                },
+            });
+            navigate('/');
+            window.location.reload();
+        }
+    };
+
     useEffect(() => { 
         if (!bartenderData) {
             const fetchBartenderData = async () => {
@@ -264,7 +286,11 @@ function BartenderQueue() {
                 <title>{pageTitle}</title>
             </Helmet>
             <div className='main-content'>
-                <Header Id={bartenderLoggedData?.id} />
+                <Header 
+                    id={bartenderLoggedData?.id}
+                    userName={bartenderLoggedData?.name}
+                    exit={exit}
+                />
                 { loading 
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (
