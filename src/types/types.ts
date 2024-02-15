@@ -50,7 +50,7 @@ export enum TypeRedirect {
     ROOT
 };
 
-export enum TypeOfGet {
+export enum LoginType {
     BARTENDER,
     USER
 };

@@ -12,6 +12,7 @@ import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
 import { UPDATE_TABLE } from '../../graphql/mutations/table';
 import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
+import { useBartenderAuthContext } from '../../contexts/BartenderAuthContext';
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -40,6 +41,7 @@ function BartenderQueue() {
     const [updateOrder] = useMutation(UPDATE_ORDER);
 
     const location = useLocation();
+    const { bartenderData: bartenderLoggedData } = useBartenderAuthContext();
     const currentPage = routes.find(page => page.route === location.pathname);
     const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
@@ -183,7 +185,7 @@ function BartenderQueue() {
                             variables: { input: { securityCode: "-1", token: token } },
                         })
                             .then(res => {
-                                resolve(res.data.getDataByToken.data);
+                                resolve(res.data.getBartenderByToken.data);
                             })
                             .catch(error => {
                                 reject(error);
@@ -266,7 +268,7 @@ function BartenderQueue() {
                         <title>{pageTitle}</title>
                     </Helmet>
                     <div className='main-content'>
-                        <Header />
+                        <Header Id={bartenderLoggedData?.id} />
                         <div className="queue-container">
                             <div className="queue-header">
                                 <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>

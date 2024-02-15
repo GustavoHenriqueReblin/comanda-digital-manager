@@ -22,8 +22,13 @@ export const GetUser = gql`
   }
 `;
 
-export const GetIdByToken = gql`
+export const GetUserByToken = gql`
     query Query($input: UserInput!) {
-      getIdByToken(input: $input)
+      getUserByToken(input: $input) {
+        id
+        password
+        token
+        username
+      }
     }
 `;

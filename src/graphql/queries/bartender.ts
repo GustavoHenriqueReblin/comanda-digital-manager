@@ -33,8 +33,8 @@ export const GetBartendersAreWaiting = gql`
 `;
 
 export const GetBartenderDataByToken = gql`
-  query GetDataByToken($input: BartenderInput!) {
-    getDataByToken(input: $input) {
+  query GetBartenderByToken($input: BartenderInput!) {
+    getBartenderByToken(input: $input) {
       data {
         id
         name

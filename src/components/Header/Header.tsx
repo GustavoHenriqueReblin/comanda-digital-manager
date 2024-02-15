@@ -1,27 +1,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import './header.scss';
 import Modal from "../Modal/Modal";
-import { routes, TypeOfGet, TypeRedirect } from '../../types/types';
-import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
-import { GetIdByToken } from '../../graphql/queries/user';
+import { routes, TypeRedirect } from '../../types/types';
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { UPDATE_USER } from "../../graphql/mutations/user";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { CgProfile } from "react-icons/cg";
 
-function Header() {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+interface HeaderProps {
+    Id?: number;
+};
+
+function Header({Id}: HeaderProps) {
     const [isModalExitOpen, setIsModalExitOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const location = useLocation();
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const [updateUser] = useMutation(UPDATE_USER);
-    const [getBartenderDataByToken] = useLazyQuery(GetBartenderDataByToken);
-    const [getIdByTokenQuery] = useLazyQuery(GetIdByToken);
     const currentPage = routes.find(page => page.route === location.pathname);
     const pageName = currentPage ? currentPage.name : 'Comanda digital';
 
@@ -29,130 +28,45 @@ function Header() {
         typeRedirect === TypeRedirect.ADMIN ? navigate('/admin') : navigate('/');
     };
 
-    const getIdByToken = (type: TypeOfGet, token?: string) => {
-        if (type === TypeOfGet.BARTENDER) {
-            return new Promise((resolve, reject) => {
-                getBartenderDataByToken({
-                    variables: { input: { securityCode: "-1", token: token } },
-                })
-                    .then(res => {
-                        resolve(res.data ? res.data.getDataByToken.data.id : null);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            });
-        } else {
-            return new Promise((resolve, reject) => {
-                getIdByTokenQuery({
-                    variables: { input: { token: token } },
-                })
-                    .then(res => {
-                        resolve(res.data ? res.data.getIdByToken : null);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            });
-        }
-    };
-
     const exit = () => {
         if (location.pathname === '/queue') { // Sair do garçom
             const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
             if (cookieName) {
-                const token = Cookies.get(cookieName);
                 Cookies.remove(cookieName);
-                getIdByToken(TypeOfGet.BARTENDER, token)
-                    .then((data) => {
-                        if (data && data !== null && Number(data) > 0) {
-                            updateBartender({
-                                variables: {
-                                    input: {
-                                        id: Number(data),
-                                        isWaiting: false,
-                                        isApproved: false,
-                                        token: "",
-                                    },
-                                },
-                            });
-                        }
-                        setIsModalExitOpen(false);
-                        navigate('/');
-                        window.location.reload();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao buscar o garçom:", error);
-                    });
+                updateBartender({
+                    variables: {
+                        input: {
+                            id: Id,
+                            isWaiting: false,
+                            isApproved: false,
+                            token: "",
+                        },
+                    },
+                });
+                setIsModalExitOpen(false);
+                navigate('/');
+                window.location.reload();
             }
         } else if (location.pathname === '/admin') { // Sair do usuário
             const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
             if (cookieName) {
-                const token = Cookies.get(cookieName); 
                 Cookies.remove(cookieName);
-                getIdByToken(TypeOfGet.USER, token)
-                    .then((data) => {
-                        if (data && data !== null && Number(data) > 0) {
-                            updateUser({
-                                variables: {
-                                    input: {
-                                        id: Number(data),
-                                        isWaiting: false,
-                                        isApproved: false,
-                                        token: "",
-                                    },
-                                },
-                            });
-                        }
-                        setIsModalExitOpen(false);
-                        navigate('/login');
-                        window.location.reload();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao buscar o usuário:", error);
-                    });
+                updateUser({
+                    variables: {
+                        input: {
+                            id: Id,
+                            isWaiting: false,
+                            isApproved: false,
+                            token: "",
+                        },
+                    },
+                });
+                setIsModalExitOpen(false);
+                navigate('/login');
+                window.location.reload();
             }
         }
     };
-
-    useEffect(() => { 
-        if (!isLoggedIn) {
-            const cookieBartenderName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-            const bartenderToken = Cookies.get(cookieBartenderName ? cookieBartenderName : '');
-            const cookieUserName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-            const userToken = Cookies.get(cookieUserName ? cookieUserName : '');  
-
-            const validateToken = async (type: TypeOfGet, id: number) => {
-                const isValidToken = Number(id) > 0;
-                if (isValidToken) {
-                    setIsLoggedIn(true);
-                } else {
-                    switch (type) {
-                        case TypeOfGet.USER:
-                            cookieUserName && Cookies.remove(cookieUserName);
-                            navigate('/login');
-                            break;
-
-                        case TypeOfGet.BARTENDER:
-                            cookieBartenderName && Cookies.remove(cookieBartenderName);
-                            navigate('/');
-                            break;
-                    
-                        default:
-                            break;
-                    }
-                }
-            };
-
-            if (location.pathname === '/admin') {
-                getIdByToken(TypeOfGet.USER, userToken)
-                    .then((res) => {validateToken(TypeOfGet.USER, Number(res))});
-            } else if (location.pathname === '/queue') {
-                getIdByToken(TypeOfGet.BARTENDER, bartenderToken)
-                    .then((res) => {validateToken(TypeOfGet.BARTENDER, Number(res))});
-            }
-        }
-    }, [isLoggedIn]);
 
     return (
         <>
@@ -161,9 +75,11 @@ function Header() {
                     <h2 className='title'>{ pageName }</h2>
                     <span className='name'>Carlota’s Kuchen Haus</span>
                 </div>
-                <div className='user-info'>
-                    <span className='icon'><CgProfile /></span>
-                </div>
+                {(Id && Id > 0) && (
+                    <div className='user-info'>
+                        <span className='icon'><CgProfile /></span>
+                    </div>
+                )} 
 
                 {/* <div className="logo">
                     <span onClick={() => redirectTo(TypeRedirect.ROOT)} className="title">Carlota’s Kuchen Haus

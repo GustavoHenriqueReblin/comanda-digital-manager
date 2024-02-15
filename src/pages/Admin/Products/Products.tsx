@@ -3,7 +3,7 @@ import './products.scss';
 import Header from "../../../components/Header/Header";
 import Loading from "../../../components/Loading";
 import NavBar from "../../../components/NavBar/NavBar";
-import { useAdminContext } from "../../../contexts/AdminContext";
+import { useAdminAuthContext } from "../../../contexts/AdminAuthContext";
 import { NavBarItemsType, routes } from "../../../types/types";
 
 import React, { useEffect, useState } from "react";
@@ -23,7 +23,7 @@ function Products({ text }: ProductsProps) {
     const { 
         adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 
-    } = useAdminContext();
+    } = useAdminAuthContext();
 
     const redirectPageNavBar = (type: NavBarItemsType) => {
         switch (type) {
