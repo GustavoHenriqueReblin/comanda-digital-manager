@@ -40,10 +40,8 @@ function Products({ text }: ProductsProps) {
         }
     };
 
-    useEffect(() => {
-        setAdminItemNavBarSelected(adminNavBarItems[1].type);
-        setLoading(false);    
-    });
+    setAdminItemNavBarSelected(adminNavBarItems[1].type);
+    loading && setLoading(false);    
 
     return (
         <>

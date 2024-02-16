@@ -159,11 +159,6 @@ function BartenderAuth() {
         refresh && window.location.reload();
     };
 
-    useEffect(() => { 
-        verifyBartenderToken();
-        setLoading(false);
-    }, []);
-
     const validateBartenderCode = (data: BartenderFormData) => {
         const { securityCode } = data;
         try {
@@ -176,6 +171,9 @@ function BartenderAuth() {
         }
     };
 
+    verifyBartenderToken();
+    loading && setLoading(false);
+    
     return (
         <>
             { loading 
