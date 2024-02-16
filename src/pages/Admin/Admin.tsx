@@ -24,10 +24,7 @@ function Admin() {
     const [data, setData] = useState<any>();
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const [updateUser] = useMutation(UPDATE_USER);
-    const location = useLocation();
-    const navigate = useNavigate();
-    const currentPage = routes.find(page => page.route === location.pathname);
-    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
+   
     const { 
         user, adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 
@@ -60,6 +57,11 @@ function Admin() {
             setIsVisible(true);
         }
     });
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
     const memoizedData = useMemo(() => {
         return data;

@@ -35,6 +35,7 @@ function BartenderQueue() {
     const [updateTable] = useMutation(UPDATE_TABLE);
     const [updateOrder] = useMutation(UPDATE_ORDER);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
+
     useQuery(GetOrders, {
         variables: { input: { status: [0,1,2,3,4] } },
         onCompleted: (res) => {
@@ -58,6 +59,7 @@ function BartenderQueue() {
             setLoading(false);
         }
     });
+    
     useSubscription(CHANGE_ORDER_STATUS, {
         onSubscriptionData: (res) => {
             const data = res.subscriptionData.data.ChangeOrderStatus;

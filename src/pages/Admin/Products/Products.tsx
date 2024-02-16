@@ -16,14 +16,16 @@ interface ProductsProps {
 
 function Products({ text }: ProductsProps) {
     const [loading, setLoading] = useState<Boolean>(true);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const currentPage = routes.find(page => page.route === location.pathname);
-    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
+    
     const { 
         adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 
     } = useAdminAuthContext();
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
     const redirectPageNavBar = (type: NavBarItemsType) => {
         switch (type) {

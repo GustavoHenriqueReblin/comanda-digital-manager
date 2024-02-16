@@ -30,6 +30,7 @@ function Login() {
 
   const [loading, setLoading] = useState(true);
   const [getUser] = useLazyQuery(GetUser);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const currentPage = routes.find(page => page.route === location.pathname);
