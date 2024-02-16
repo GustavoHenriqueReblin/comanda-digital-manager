@@ -31,8 +31,8 @@ function Header({ id, userName, exit }: HeaderProps) {
                 </div>
                 {(id && id > 0) && (
                     <div className='user-info'>
-                        <span className='icon'><CgProfile /></span>
-                        <div className={`exit ${isExitOptionOpen && 'underline'}`} onClick={() => setIsExitOptionOpen(!isExitOptionOpen)}>
+                        <span className='icon' onClick={() => setIsExitOptionOpen(!isExitOptionOpen)}><CgProfile /></span>
+                        <div className="exit" onClick={() => setIsExitOptionOpen(!isExitOptionOpen)}>
                             <span className='username'>{ userName }</span>
                             <span className='arrow'><IoIosArrowDown /></span>
                             { isExitOptionOpen && (
