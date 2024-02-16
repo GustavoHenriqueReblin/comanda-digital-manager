@@ -8,7 +8,7 @@ import { GetBartender } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -31,48 +31,7 @@ function BartenderAuth() {
     const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
     const [resMessage, setResMessage] = useState('');
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
-    const [getBartender] = useLazyQuery(GetBartender, {
-        fetchPolicy: 'cache-and-network',
-        onCompleted: (res) => {
-            const data = res.bartender.data;
-            if (data && data !== null && data.id > 0) {
-                const hasResponse = data.isApproved != null;
-                
-                if (!hasResponse && verifyRequstAuthInCookie()) { // Já enviou a solicitação...
-                    setLoading(false);
-                    return;
-                }        
-                
-                if (!data.isWaiting) {
-                    if (!hasResponse) { // Enviou a solicitação
-                        updateBartender({ variables: {
-                            input: {
-                                id: data.id, 
-                                isWaiting: true,
-                                token: data.token
-                            },
-                        }, });
-        
-                        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-                        if (cookieName) {
-                            Cookies.set(cookieName, JSON.stringify(data), { expires: 0.0416667 }); // 1 hora
-                        }
-                        verifyRequstAuthInCookie();
-        
-                    } else { // Recebeu resposta da solicitação
-                        refreshByResponse(data);
-                    }
-                }
-            } else if (!verifyRequstAuthInCookie()) {
-                setIsInputBlocked(false);
-                setSecurityCodeValue('securityCode', "");
-            }
-            
-            if (data && res.bartender.message !== null) {
-                setResMessage(res.bartender.message);
-            };
-        },
-    });
+    const [getBartender] = useLazyQuery(GetBartender, {fetchPolicy: 'cache-and-network'});
     useSubscription(BARTENDER_AUTH_RESPONSE, {
         onSubscriptionData: (res) => {
             const data = res.subscriptionData.data.authBartenderResponse;
@@ -165,7 +124,46 @@ function BartenderAuth() {
             setResMessage('');
             getBartender({
                 variables: { input: { securityCode: securityCode } },
-            });
+            })
+                .then((res) => {
+                    const data = res?.data?.bartender?.data;
+                    if (data && data !== null && data.id > 0) {
+                        const hasResponse = data.isApproved != null;
+                        
+                        if (!hasResponse && verifyRequstAuthInCookie()) { // Já enviou a solicitação...
+                            setLoading(false);
+                            return;
+                        }        
+                        
+                        if (!data.isWaiting) {
+                            if (!hasResponse) { // Enviou a solicitação
+                                updateBartender({ variables: {
+                                    input: {
+                                        id: data.id, 
+                                        isWaiting: true,
+                                        token: data.token
+                                    },
+                                }, });
+                
+                                const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
+                                if (cookieName) {
+                                    Cookies.set(cookieName, JSON.stringify(data), { expires: 0.0416667 }); // 1 hora
+                                }
+                                verifyRequstAuthInCookie();
+                
+                            } else { // Recebeu resposta da solicitação
+                                refreshByResponse(data);
+                            }
+                        }
+                    } else if (!verifyRequstAuthInCookie()) {
+                        setIsInputBlocked(false);
+                        setSecurityCodeValue('securityCode', "");
+                    }
+                    
+                    if (data && res?.data?.bartender?.message !== null) {
+                        setResMessage(res?.data?.bartender?.message);
+                    };
+                });
         } catch (error) {
             console.error("Erro ao buscar o garçom:", error);
         }

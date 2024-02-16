@@ -6,7 +6,7 @@ import NavBar from "../../../components/NavBar/NavBar";
 import { useAdminAuthContext } from "../../../contexts/AdminAuthContext";
 import { NavBarItemsType, routes } from "../../../types/types";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 

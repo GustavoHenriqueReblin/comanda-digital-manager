@@ -11,7 +11,7 @@ import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useSubscription } from "@apollo/client";
@@ -41,7 +41,8 @@ function Admin() {
             setData(data);
             setLoading(false);
         },
-        onError: () => {
+        onError: (err) => {
+            console.error(err);
             setLoading(false);
         }
     });

@@ -7,8 +7,7 @@ import CustomSelect from '../../components/CustomSelect/CustomSelect';
 import Modal from '../../components/Modal/Modal';
 import Header from '../../components/Header/Header';
 import { FormatDate } from '../../helper';
-import { Order, OrderFilterOptions, routes, Bartender, OrderFilter } from "../../types/types";
-import { GetBartenderDataByToken } from '../../graphql/queries/bartender';
+import { Order, OrderFilterOptions, routes, OrderFilter } from "../../types/types";
 import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
 import { UPDATE_TABLE } from '../../graphql/mutations/table';
@@ -16,31 +15,67 @@ import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { UPDATE_BARTENDER } from '../../graphql/mutations/bartender';
 import { useBartenderAuthContext } from '../../contexts/BartenderAuthContext';
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
 
 function BartenderQueue() {
     enum selectOrderOption {
         CANCEL,
         CONFIRM,
     };
-    const [bartender, setBartender] = useState<Bartender | null>(null);
     const [loading, setLoading] = useState<Boolean>(true);
     const [data, setData] = useState<Order[] | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [filterIndex, setFilterIndex] = useState<string>('0');
     const [isModalCancelOpen, setIsModalCancelOpen] = useState<boolean>(false);
     const [isModalConfirmOpen, setIsModalConfirmOpen] = useState<boolean>(false);
-
-    const { data: subscriptionOrdersData } = useSubscription(CHANGE_ORDER_STATUS);
-    const [getBartenderDataByToken, { data: bartenderData }] = useLazyQuery(GetBartenderDataByToken);
-    const [getOrdersData, { data: ordersData }] = useLazyQuery(GetOrders);
     const [updateTable] = useMutation(UPDATE_TABLE);
     const [updateOrder] = useMutation(UPDATE_ORDER);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
+    useQuery(GetOrders, {
+        variables: { input: { status: [0,1,2,3,4] } },
+        onCompleted: (res) => {
+            const resData = (res.orders || []).map((order: any) => {
+                return {
+                    ...order,
+                    value: Number(order.value).toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                    }),
+                    date: FormatDate(order.date),
+                    statusName: getOrderStatusName(order.status)
+                } as Order;
+            });
+            setData(resData);
+            setFilterIndex('0');
+            setLoading(false);
+        },
+        onError: (err) => {
+            console.error(err);
+            setLoading(false);
+        }
+    });
+    useSubscription(CHANGE_ORDER_STATUS, {
+        onSubscriptionData: (res) => {
+            const data = res.subscriptionData.data.ChangeOrderStatus;
+            setData(
+                (data || []).map((order: any) => {
+                    return {
+                        ...order.data,
+                        value: Number(order.data.value).toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                        }),
+                        date: FormatDate(order.data.date),
+                        statusName: getOrderStatusName(order.data.status)
+                    } as Order;
+                })
+            );
+        }
+    });
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -111,8 +146,8 @@ function BartenderQueue() {
             variables: {
                 input: {
                     id: selectedOrder.id,
-                    bartenderId: bartender?.id ?? selectedOrder.bartenderId,
-                    bertenderName: bartender?.name ?? '',
+                    bartenderId: bartenderLoggedData?.id ?? selectedOrder.bartenderId,
+                    bertenderName: bartenderLoggedData?.name ?? '',
                     status: (() => {
                         switch (option) {
                             case selectOrderOption.CONFIRM:
@@ -196,90 +231,6 @@ function BartenderQueue() {
         }
     };
 
-    useEffect(() => { 
-        if (!bartenderData) {
-            const fetchBartenderData = async () => {
-                const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-                if (cookieName) {
-                    const token = Cookies.get(cookieName); 
-                    return new Promise((resolve, reject) => {
-                        getBartenderDataByToken({
-                            variables: { input: { securityCode: "-1", token: token } },
-                        })
-                            .then(res => {
-                                resolve(res.data.getBartenderByToken.data);
-                            })
-                            .catch(error => {
-                                reject(error);
-                            });
-                    });
-                }
-            };
-
-            const fetchOrdersData = async () => {
-                if (!ordersData) {
-                    return new Promise((resolve, reject) => {
-                        getOrdersData({
-                            variables: { input: { status: [0,1,2,3,4] } },
-                        })
-                            .then(res => {
-                                const resData = (res.data.orders || []).map((order: any) => {
-                                    return {
-                                        ...order,
-                                        value: Number(order.value).toLocaleString('pt-BR', {
-                                            style: 'currency',
-                                            currency: 'BRL',
-                                        }),
-                                        date: FormatDate(order.date),
-                                        statusName: getOrderStatusName(order.status)
-                                    } as Order;
-                                });
-                                resolve(resData);
-                            })
-                            .catch(error => {
-                                reject(error);
-                            });
-                    });
-                }
-            };
-
-            fetchBartenderData()
-                .then((data) => {
-                    setBartender(data as Bartender);
-                    return fetchOrdersData();
-                })
-                .then((data) => {
-                    setFilterIndex('0');
-                    setData(data as Order[]);
-                    setLoading(false);
-                })
-                .catch((bartenderError) => {
-                    console.error("Erro ao buscar os dados do garçom:", bartenderError);
-                })
-                .catch((ordersError) => {
-                    console.error("Erro ao buscar os pedidos:", ordersError);
-                });
-        }
-    }, [bartenderData]);
-
-    useEffect(() => { 
-        if (subscriptionOrdersData) {
-            setData(
-                (subscriptionOrdersData?.ChangeOrderStatus || []).map((order: any) => {
-                    return {
-                        ...order.data,
-                        value: Number(order.data.value).toLocaleString('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                        }),
-                        date: FormatDate(order.data.date),
-                        statusName: getOrderStatusName(order.data.status)
-                    } as Order;
-                })
-            );
-        }
-    }, [subscriptionOrdersData]);
-
     return (
         <>
             <Helmet>
@@ -297,7 +248,7 @@ function BartenderQueue() {
                     <>
                         <div className="queue-container">
                             <div className="queue-header">
-                                <h2 className="title">Seja bem vindo(a) {bartender?.name}!</h2>
+                                <h2 className="title">Seja bem vindo(a) {bartenderLoggedData?.name}!</h2>
                                 <CustomSelect 
                                     options={OrderFilterOptions} 
                                     onClickFilter={handleFilterSelect}
