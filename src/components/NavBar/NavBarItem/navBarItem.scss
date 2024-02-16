@@ -7,10 +7,17 @@
     flex-direction: row;
     align-items: center;
     margin: 4px 0px;
-    padding-left: 36px;
     font-size: 20px;
     transition: height 0.3s ease-in-out;
     cursor: pointer;
+
+    @media screen and (min-width: 1px) {
+        padding-left: 28px;
+    }
+
+    @media screen and (min-width: 1024px) {
+        padding-left: 36px;
+    }
 
     &:hover {
         background-color: $hover-bg-color;
@@ -19,7 +26,14 @@
     &.selected {
         border-left: 6px solid $text-color;
         border-radius: 4px;
-        padding-left: 30px;
+        
+        @media screen and (min-width: 1px) {
+            padding-left: 22px;
+        }
+    
+        @media screen and (min-width: 1024px) {
+            padding-left: 30px;
+        }
     }
 
     &.navbar-expanded {
@@ -33,8 +47,15 @@
     }
 
     .item-description {
-        padding-left: 18px;
         font-size: 17px;
         font-weight: 500;
+
+        @media screen and (min-width: 1px) {
+            padding-left: 12px;
+        }
+    
+        @media screen and (min-width: 1024px) {
+            padding-left: 18px;
+        }
     }
 }
