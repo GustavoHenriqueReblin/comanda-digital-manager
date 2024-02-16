@@ -4,7 +4,7 @@ import Loading from '../../components/Loading';
 import { routes } from '../../types/types';
 import { GetUser } from '../../graphql/queries/user';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -29,7 +29,7 @@ function Login() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [getUser, { data }] = useLazyQuery(GetUser);
+  const [getUser] = useLazyQuery(GetUser);
   const navigate = useNavigate();
   const location = useLocation();
   const currentPage = routes.find(page => page.route === location.pathname);
@@ -40,31 +40,30 @@ function Login() {
     navigate('/admin');
   }
 
-  // Ao dar o refetch no usuário verifica os dados
-  useEffect(() => {
-    if (data && data.user != null) {
-      const token = data.user.token;
-      const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-      if (cookieName) {
-        Cookies.set(cookieName, token, { expires: 1 });
-      }
-      navigate('/admin');
-    }
-
-    setLoading(false);
-  }, [data, navigate]);
-
   // Ao clicar em entrar
   const validateLogin = (data: LoginFormData) => {
     const { user, password } = data;
     try {
       getUser({
         variables: { input: { username: user, password: password } },
-      });
+      })
+        .then((res) => {
+          const data = res?.data;
+          if (data && data.user != null) {
+            const token = data.user.token;
+            const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+            if (cookieName) {
+              Cookies.set(cookieName, token, { expires: 1 });
+            }
+            navigate('/admin');
+          }
+        });
     } catch (error) {
       console.error("Erro ao buscar o usuário:", error);
     }
   };
+
+  loading && setLoading(false);
 
   return (
     <>
