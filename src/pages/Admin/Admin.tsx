@@ -11,10 +11,10 @@ import { GetBartendersAreWaiting } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_REQUEST, BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
+import { useQuery, useMutation, useSubscription } from "@apollo/client";
 import { Helmet } from "react-helmet";
 import { UPDATE_USER } from '../../graphql/mutations/user';
 
@@ -22,9 +22,6 @@ function Admin() {
     const [loading, setLoading] = useState<Boolean>(true);
     const [isVisible, setIsVisible] = useState<Boolean>(false);
     const [data, setData] = useState<any>();
-    const [getBartendersAreWaiting] = useLazyQuery(GetBartendersAreWaiting);
-    const { data: authRequestData } = useSubscription(BARTENDER_AUTH_REQUEST);
-    const { data: authResponseData } = useSubscription(BARTENDER_AUTH_RESPONSE);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
     const [updateUser] = useMutation(UPDATE_USER);
     const location = useLocation();
@@ -35,6 +32,37 @@ function Admin() {
         user, adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 
     } = useAdminAuthContext();
+
+    useQuery(GetBartendersAreWaiting, {
+        onCompleted: (res) => {
+            const data = res.bartendersAreWaiting ? res.bartendersAreWaiting.map((item: any) => item.data) : null;
+            setAdminItemNavBarSelected(adminNavBarItems[0].type);
+            data && data !== null && setIsVisible(true);
+            setData(data);
+            setLoading(false);
+        },
+        onError: () => {
+            setLoading(false);
+        }
+    });
+
+    useSubscription(BARTENDER_AUTH_REQUEST, {
+        onSubscriptionData: (data) => {
+            setData(data.subscriptionData.data.authBartenderRequest);
+            setIsVisible(true);
+        }
+    });
+
+    useSubscription(BARTENDER_AUTH_RESPONSE, {
+        onSubscriptionData: (data) => {
+            setData(data.subscriptionData.data.authBartenderResponse);
+            setIsVisible(true);
+        }
+    });
+
+    const memoizedData = useMemo(() => {
+        return data;
+    }, [data]);
 
     const sendResponseAuthReq = (bartender: any, approved: boolean) => {
         updateBartender({ variables: {
@@ -52,47 +80,6 @@ function Admin() {
             Cookies.remove(cookieName);
         }
     };
-
-    const fetchBartendersAreWaiting = () => {
-        return new Promise((resolve, reject) => {
-            getBartendersAreWaiting()
-                .then(res => {
-                    resolve(res.data ? res.data.bartendersAreWaiting.map((item: any) => item.data) : null);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    };
-
-    useEffect(() => {
-        authRequestData
-            ? setData(authRequestData.authBartenderRequest)
-            : fetchBartendersAreWaiting()
-                .then(data => {
-                    setData(data);
-                    setAdminItemNavBarSelected(adminNavBarItems[0].type);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar dados:", error);
-                });
-
-        setIsVisible(true);
-    }, [authRequestData]);
-
-    useEffect(() => {
-        if (authResponseData) {
-            fetchBartendersAreWaiting()
-                .then(data => {
-                    setData(data);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar dados:", error);
-                });
-        }
-    }, [authResponseData]);
 
     const redirectPageNavBar = (type: NavBarItemsType) => {
         switch (type) {
@@ -155,8 +142,8 @@ function Admin() {
                         <span>Testando</span>
 
                         <div className="card-container">
-                            { isVisible && data && Array.isArray(data) ? (
-                                data.map((bartender: any) => (
+                            { isVisible && memoizedData && Array.isArray(memoizedData) ? (
+                                memoizedData.map((bartender: any) => (
                                     <BartenderAuthCard
                                         key={bartender.id}
                                         bartender={bartender}
