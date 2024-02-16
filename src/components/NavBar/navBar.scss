@@ -8,6 +8,13 @@
     transition: width 0.3s ease-in-out;
     color: $text-color;
 
+    @media screen and (min-width: 1024px) {
+        &:hover {
+            width: 280px;
+            transition: width 0.2s ease-in-out;
+        }
+    }
+
     &.expanded {
         width: 280px;
         transition: width 0.2s ease-in-out;

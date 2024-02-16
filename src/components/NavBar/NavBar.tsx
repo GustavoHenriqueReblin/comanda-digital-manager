@@ -1,7 +1,7 @@
 import './navBar.scss';
 import NavBarItemComponent from './NavBarItem/NavBarItem';
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { LuChefHat } from "react-icons/lu";
 import { NavBarItem, NavBarItemsType } from '../../types/types';
 
@@ -34,7 +34,10 @@ function NavBar({ items, itemSelected, setItemSelected, redirect, isExpanded, se
 
     return (
         <>
-            <div className={`navbar-container ${isExpanded && 'expanded'}`}>
+            <div className={`navbar-container ${isExpanded && 'expanded'}`} 
+                onMouseEnter={() => {setIsExpanded(true)}} 
+                onMouseLeave={() => {setIsExpanded(false)}}
+            >
                 <div onClick={() => setIsExpanded(!isExpanded)}  className="icon">
                     <LuChefHat />
                 </div>
