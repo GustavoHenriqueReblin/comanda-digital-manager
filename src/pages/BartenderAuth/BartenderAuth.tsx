@@ -28,9 +28,9 @@ const bartenderFormSchema = z.object({
 function BartenderAuth() {
     const [loading, setLoading] = useState(true);
     const [isInputBlocked, setIsInputBlocked] = useState(false);
+    const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
     const [resMessage, setResMessage] = useState('');
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
-    const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
     const [getBartender] = useLazyQuery(GetBartender, {
         fetchPolicy: 'cache-and-network',
         onCompleted: (res) => {
@@ -81,11 +81,12 @@ function BartenderAuth() {
             };
         }
     });
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const { register, setValue: setSecurityCodeValue, handleSubmit, formState: { errors } } = useForm<BartenderFormData>({
         resolver: zodResolver(bartenderFormSchema),
     });
-    const navigate = useNavigate();
-    const location = useLocation();
     const currentPage = routes.find(page => page.route === location.pathname);
     const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
@@ -115,7 +116,7 @@ function BartenderAuth() {
         } else { // Recusou
             cancelRequestWait(true);
         }
-    }
+    };
 
     const verifyBartenderToken = () => {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
