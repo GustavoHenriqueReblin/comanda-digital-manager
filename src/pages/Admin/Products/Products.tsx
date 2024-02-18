@@ -4,11 +4,14 @@ import Header from "../../../components/Header/Header";
 import Loading from "../../../components/Loading";
 import NavBar from "../../../components/NavBar/NavBar";
 import { useAdminAuthContext } from "../../../contexts/AdminAuthContext";
+import { UPDATE_USER } from '../../../graphql/mutations/user';
 import { NavBarItemsType, routes } from "../../../types/types";
 
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import Cookies from 'js-cookie';
+import { useMutation } from '@apollo/client';
 
 interface ProductsProps {
     text: string;
@@ -18,9 +21,10 @@ function Products({ text }: ProductsProps) {
     const [loading, setLoading] = useState<Boolean>(true);
     
     const { 
-        adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
+        user, adminNavBarItems, adminItemNavBarSelected, setAdminItemNavBarSelected, 
         isAdminNavBarExpanded, setIsAdminNavBarExpanded 
     } = useAdminAuthContext();
+    const [updateUser] = useMutation(UPDATE_USER);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -39,6 +43,25 @@ function Products({ text }: ProductsProps) {
         
             default:
                 break;
+        }
+    };
+    
+    const exit = () => {
+        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+        if (cookieName) {
+            Cookies.remove(cookieName);
+            updateUser({
+                variables: {
+                    input: {
+                        id: user?.id,
+                        isWaiting: false,
+                        isApproved: false,
+                        token: "",
+                    },
+                },
+            });
+            navigate('/login');
+            window.location.reload();
         }
     };
 
@@ -60,12 +83,16 @@ function Products({ text }: ProductsProps) {
             ></NavBar>
 
             <div className='main-content'>
-                <Header />
+                <Header 
+                    id={user?.id}
+                    userName={user?.username}
+                    exit={exit}
+                />
                 { loading 
                 ? (<Loading title="Aguarde, carregando..." />) 
                 : (
                     <>
-                        <span>{ text }</span>
+                        <h2 className='title'>Gerencie seus produtos: </h2>
                     </>
                 )}
             </div>

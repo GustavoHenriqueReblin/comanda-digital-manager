@@ -3,6 +3,8 @@
 .navbar-container {
     height: 100%;
     width: 96px;
+    min-width: 60px;
+    max-width: 280px;
     padding: 48px 0px;
     background-color: $bg-color;
     transition: width 0.3s ease-in-out;
