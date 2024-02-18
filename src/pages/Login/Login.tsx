@@ -4,7 +4,7 @@ import Loading from '../../components/Loading';
 import { routes } from '../../types/types';
 import { GetUser } from '../../graphql/queries/user';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -36,11 +36,6 @@ function Login() {
   const currentPage = routes.find(page => page.route === location.pathname);
   const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
-  const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-  if (!!(Cookies.get(cookieName ? cookieName : ''))) { // Se já tiver token vai para o admin
-    navigate('/admin');
-  }
-
   // Ao clicar em entrar
   const validateLogin = (data: LoginFormData) => {
     const { user, password } = data;
@@ -63,6 +58,13 @@ function Login() {
       console.error("Erro ao buscar o usuário:", error);
     }
   };
+
+  useEffect(() => {
+    const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+    if (!!(Cookies.get(cookieName ? cookieName : ''))) { // Se já tiver token vai para o admin
+      navigate('/admin');
+    }
+  });
 
   loading && setLoading(false);
 
