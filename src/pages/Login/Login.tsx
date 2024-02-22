@@ -41,7 +41,7 @@ function Login() {
     const { user, password } = data;
     try {
       getUser({
-        variables: { input: { username: user, password: password } },
+        variables: { input: { email: user, password: password } },
       })
         .then((res) => {
           const data = res?.data;
