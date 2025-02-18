@@ -8,7 +8,7 @@ import { GetBartender } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -83,7 +83,7 @@ function BartenderAuth() {
         const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
         const bartenderToken = Cookies.get(cookieName ? cookieName : '');  
         if (bartenderToken) {
-            navigate('/queue');
+            navigate('/myorders');
         }
     };
 
@@ -171,7 +171,9 @@ function BartenderAuth() {
         }
     };
 
-    verifyBartenderToken();
+    useEffect(() => {
+        verifyBartenderToken();
+    });
     loading && setLoading(false);
     
     return (

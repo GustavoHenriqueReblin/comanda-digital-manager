@@ -80,7 +80,7 @@ export const OrderFilterOptions = [
 export const routes: Page[] = [
     {route: '/', title: 'Comanda digital - Página Inicial', name: 'Página Inicial' },
     {route: '/admin', title: 'Comanda digital - Painel de controle', name: 'Painel de controle' },
-    {route: '/queue', title: 'Comanda digital - Seus pedidos', name: 'Seus pedidos' },
+    {route: '/myorders', title: 'Comanda digital - Seus pedidos', name: 'Seus pedidos' },
     {route: '/login', title: 'Comanda digital - Login', name: 'Login' },
     {route: '/admin/products', title: 'Comanda digital - Produtos', name: 'Produtos' },
 ];

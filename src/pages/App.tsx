@@ -3,7 +3,7 @@ import Admin from './Admin/Admin';
 import Products from './Admin/Products/Products';
 import ResponsiveProvider from "../components/ResponsiveProvider";
 import Bartender from './BartenderAuth/BartenderAuth';
-import BartenderQueue from './BartenderQueue/BartenderQueue';
+import BartenderOrders from './BartenderOrders/BartenderOrders';
 import { AdminAuthProvider } from '../contexts/AdminAuthContext';
 import { BartenderAuthProvider } from '../contexts/BartenderAuthContext';
 
@@ -29,7 +29,7 @@ function App() {
       <Routes>
           <Route 
             path='/admin' element={
-              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
+              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME}> 
                 <AdminAuthProvider>
                   <Admin /> 
                 </AdminAuthProvider>
@@ -38,7 +38,7 @@ function App() {
           />
           <Route 
             path='/admin/products' element={
-              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_NAME_USER_TOKEN}> 
+              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME}> 
                 <AdminAuthProvider>
                   <Products text='Testando' /> 
                 </AdminAuthProvider>
@@ -46,10 +46,10 @@ function App() {
             } 
           />
           <Route 
-            path='/queue' element={
+            path='/myorders' element={
               <PrivateRoute redirectTo="/" cookieName={process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN}> 
                 <BartenderAuthProvider>
-                  <BartenderQueue />
+                  <BartenderOrders />
                 </BartenderAuthProvider>
               </PrivateRoute>
             } 

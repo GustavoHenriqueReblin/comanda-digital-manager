@@ -47,7 +47,7 @@ function Products({ text }: ProductsProps) {
     };
     
     const exit = () => {
-        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
         if (cookieName) {
             Cookies.remove(cookieName);
             updateUser({

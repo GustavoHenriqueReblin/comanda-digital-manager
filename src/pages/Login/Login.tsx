@@ -2,7 +2,7 @@ import '../../global.scss';
 import './login.scss';
 import Loading from '../../components/Loading';
 import { routes } from '../../types/types';
-import { GetUser } from '../../graphql/queries/user';
+import { LoginQuery } from '../../graphql/queries/user';
 
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
@@ -29,7 +29,7 @@ function Login() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [getUser] = useLazyQuery(GetUser);
+  const [login] = useLazyQuery(LoginQuery);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,30 +37,21 @@ function Login() {
   const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
   // Ao clicar em entrar
-  const validateLogin = (data: LoginFormData) => {
+  const onSubmit = (data: LoginFormData) => {
     const { user, password } = data;
-    try {
-      getUser({
-        variables: { input: { email: user, password: password } },
+    login({
+      variables: { input: { email: user, password: password } },
+    })
+      .then(() => {
+        navigate('/admin');
       })
-        .then((res) => {
-          const data = res?.data;
-          if (data && data.user != null) {
-            const token = data.user.token;
-            const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
-            if (cookieName) {
-              Cookies.set(cookieName, token, { expires: 1 });
-            }
-            navigate('/admin');
-          }
-        });
-    } catch (error) {
-      console.error("Erro ao buscar o usuário:", error);
-    }
+      .catch((error) => {
+        console.error("Erro ao buscar o usuário:", error);
+      });
   };
 
   useEffect(() => {
-    const cookieName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+    const cookieName = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
     if (!!(Cookies.get(cookieName ? cookieName : ''))) { // Se já tiver token vai para o admin
       navigate('/admin');
     }
@@ -73,7 +64,7 @@ function Login() {
       { loading 
       ? ( <Loading title="Aguarde, carregando..." /> ) 
       : (
-        <form className='login' onSubmit={handleSubmit(validateLogin)}>
+        <form className='login' onSubmit={handleSubmit(onSubmit)}>
           <Helmet>
               <title>{pageTitle}</title>
           </Helmet>

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import './bartenderQueue.scss';
+import './bartenderOrders.scss';
 
 import Loading from '../../components/Loading';
 import CustomDataTable from '../../components/CustomDataTable/CustomDataTable';
@@ -11,7 +11,6 @@ import { Order, OrderFilterOptions, routes, OrderFilter } from "../../types/type
 import { GetOrders } from '../../graphql/queries/order';
 import { UPDATE_ORDER } from '../../graphql/mutations/order';
 import { UPDATE_TABLE } from '../../graphql/mutations/table';
-import { CHANGE_ORDER_STATUS } from "../../graphql/subscriptions/order";
 import { UPDATE_BARTENDER } from '../../graphql/mutations/bartender';
 import { useBartenderAuthContext } from '../../contexts/BartenderAuthContext';
 
@@ -19,7 +18,7 @@ import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { useQuery, useMutation, useSubscription } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 
 function BartenderQueue() {
     enum selectOrderOption {
@@ -36,8 +35,17 @@ function BartenderQueue() {
     const [updateOrder] = useMutation(UPDATE_ORDER);
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
 
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { bartenderData: bartenderLoggedData } = useBartenderAuthContext();
+    const currentPage = routes.find(page => page.route === location.pathname);
+    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
+
     useQuery(GetOrders, {
-        variables: { input: { status: [0,1,2,3,4] } },
+        variables: { input: { 
+            status: [0,1,2,3,4],
+            bartenderId: bartenderLoggedData?.id ?? undefined,
+         } },
         onCompleted: (res) => {
             const resData = (res.orders || []).map((order: any) => {
                 return {
@@ -59,31 +67,6 @@ function BartenderQueue() {
             setLoading(false);
         }
     });
-    
-    useSubscription(CHANGE_ORDER_STATUS, {
-        onSubscriptionData: (res) => {
-            const data = res.subscriptionData.data.ChangeOrderStatus;
-            setData(
-                (data || []).map((order: any) => {
-                    return {
-                        ...order.data,
-                        value: Number(order.data.value).toLocaleString('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                        }),
-                        date: FormatDate(order.data.date),
-                        statusName: getOrderStatusName(order.data.status)
-                    } as Order;
-                })
-            );
-        }
-    });
-
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { bartenderData: bartenderLoggedData } = useBartenderAuthContext();
-    const currentPage = routes.find(page => page.route === location.pathname);
-    const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
     const tableOrderColumns = [
         {

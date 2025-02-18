@@ -2,8 +2,6 @@ import React, { createContext, useContext, useState } from "react";
 import { NavBarItem, NavBarItemsType, User } from "../types/types";
 import { GoHomeFill } from "react-icons/go";
 import { MdFastfood } from "react-icons/md";
-import { useQuery } from "@apollo/client";
-import { GetUserByToken } from "../graphql/queries/user";
 import Cookies from "js-cookie";
 
 interface AdminAuthContextProps {
@@ -38,21 +36,17 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         //{ type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
     ];
 
-    const cookieUserName = process.env.REACT_APP_COOKIE_NAME_USER_TOKEN;
+    const cookieUserName = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
     const userToken = Cookies.get(cookieUserName ? cookieUserName : '');  
-
-    const { data } = useQuery(GetUserByToken, {
-        variables: { input: { token: userToken } },
-    });
     
-    if (data && Number(data.getUserByToken.id) === -1) {
+    if (!userToken) {
         cookieUserName && Cookies.remove(cookieUserName);
         window.location.reload();
     }
 
     return (
         <AdminAuthContext.Provider value={{
-            user: data?.getUserByToken as User, adminNavBarItems, adminItemNavBarSelected, 
+            user: null as unknown as User, adminNavBarItems, adminItemNavBarSelected, 
             setAdminItemNavBarSelected, isAdminNavBarExpanded, setIsAdminNavBarExpanded
         }}>
             { children }
