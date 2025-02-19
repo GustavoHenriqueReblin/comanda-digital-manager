@@ -1,17 +1,14 @@
 import { gql } from '@apollo/client';
 
-export const GetBartender = gql`
-  query GetBartender($input: BartenderInput!) {
+export const FindBartender = gql`
+  query Bartender($input: BartenderInput!) {
     bartender(input: $input) {
       data {
         id
         name
         securityCode
-        isWaiting
-        isApproved
         token
       }
-      message
     }
   }
 `;

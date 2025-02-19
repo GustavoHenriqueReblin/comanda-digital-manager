@@ -4,7 +4,7 @@ import './bartenderAuth.scss';
 import Loading from "../../components/Loading";
 import Header from '../../components/Header/Header';
 import { routes } from "../../types/types";
-import { GetBartender } from "../../graphql/queries/bartender";
+import { FindBartender } from "../../graphql/queries/bartender";
 import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
 import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
 
@@ -35,7 +35,7 @@ function BartenderAuth() {
     const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
     const [resMessage, setResMessage] = useState('');
     const [updateBartender] = useMutation(UPDATE_BARTENDER);
-    const [getBartender] = useLazyQuery(GetBartender, {fetchPolicy: 'cache-and-network'});
+    const [getBartender] = useLazyQuery(FindBartender, {fetchPolicy: 'cache-and-network'});
     
     useSubscription(BARTENDER_AUTH_RESPONSE, {
         onSubscriptionData: (res) => {
