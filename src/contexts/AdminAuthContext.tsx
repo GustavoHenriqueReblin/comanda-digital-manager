@@ -4,6 +4,7 @@ import { GoHomeFill } from "react-icons/go";
 import { MdFastfood } from "react-icons/md";
 import {  useQuery } from "@apollo/client";
 import { findUserQuery } from "../graphql/queries/user";
+import Cookies from "js-cookie";
 
 interface AdminAuthContextProps {
     user: User | null;
@@ -37,7 +38,19 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         //{ type: NavBarItemsType.BARTENDERS, description: 'Garçons', icon: <FaUserAlt /> },
     ];
 
-    useQuery(findUserQuery);
+    useQuery(findUserQuery, {
+        onError: (error) => {
+            if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+                error.graphQLErrors.forEach(graphQLError => {
+                    if (graphQLError.extensions?.code === 'UNAUTHENTICATED') {
+                        const cookieUserName = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
+                        cookieUserName && Cookies.remove(cookieUserName);
+                        window.location.reload();
+                    }
+                });
+            }
+        },
+    });
 
     return (
         <AdminAuthContext.Provider value={{
