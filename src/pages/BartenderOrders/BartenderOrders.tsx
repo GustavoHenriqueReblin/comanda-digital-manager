@@ -198,7 +198,7 @@ function BartenderQueue() {
     };
 
     const exit = () => {
-        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
+        const cookieName: string | undefined = process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME;
         if (cookieName) {
             Cookies.remove(cookieName);
             updateBartender({

@@ -51,7 +51,7 @@ function Login() {
   };
 
   useEffect(() => {
-    const cookieName = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
+    const cookieName = process.env.REACT_APP_COOKIE_AUTH_USER_TOKEN_NAME;
     if (!!(Cookies.get(cookieName ? cookieName : ''))) { // Se já tiver token vai para o admin
       navigate('/admin');
     }

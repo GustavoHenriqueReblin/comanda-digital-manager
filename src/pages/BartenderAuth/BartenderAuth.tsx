@@ -1,12 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import './bartenderAuth.scss';
 
-import Loading from "../../components/Loading";
 import Header from '../../components/Header/Header';
 import { routes } from "../../types/types";
 import { FindBartender } from "../../graphql/queries/bartender";
-import { UPDATE_BARTENDER } from "../../graphql/mutations/bartender";
-import { BARTENDER_AUTH_RESPONSE } from "../../graphql/subscriptions/bartender";
+import { CancelAuthBartenderRequest } from "../../graphql/mutations/bartender";
 
 import React, { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
@@ -16,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet";
+import { BARTENDER_AUTH_RESPONSE } from '../../graphql/subscriptions/bartender';
 
 interface BartenderFormData {
     securityCode: string;
@@ -30,187 +29,114 @@ function BartenderAuth() {
         resolver: zodResolver(bartenderFormSchema),
     });
 
-    const [loading, setLoading] = useState(true);
-    const [isInputBlocked, setIsInputBlocked] = useState(false);
-    const [bartenderDataIsWaiting, setBartenderDataIsWaiting] = useState(null);
-    const [resMessage, setResMessage] = useState('');
-    const [updateBartender] = useMutation(UPDATE_BARTENDER);
-    const [getBartender] = useLazyQuery(FindBartender, {fetchPolicy: 'cache-and-network'});
+    const [isWaiting, setisWaiting] = useState<boolean>(false);
+    const [getBartender] = useLazyQuery(FindBartender, {fetchPolicy: 'network-only'});
     
     useSubscription(BARTENDER_AUTH_RESPONSE, {
         onSubscriptionData: (res) => {
             const data = res.subscriptionData.data.authBartenderResponse;
-            if (!data.isWaiting &&  data.isApproved != null) {
-                refreshByResponse(data);
-            };
+            if (!data.authRequestStatus) {
+                Cookies.remove(process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME ?? "");
+                setisWaiting(false);
+            }
+            navigate('/myorders');
         }
     });
+    const [cancelAuthBartenderRequest] = useMutation(CancelAuthBartenderRequest);
 
     const navigate = useNavigate();
     const location = useLocation();
     const currentPage = routes.find(page => page.route === location.pathname);
     const pageTitle = currentPage ? currentPage.title : 'Comanda digital';
 
-    const verifyRequstAuthInCookie = (): boolean => {
-        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-        const bartenderDataIsWaiting = Cookies.get(cookieName ? cookieName : ''); 
-        const res = !!bartenderDataIsWaiting;  
-        setBartenderDataIsWaiting(res ? () => {
-            const data = JSON.parse(bartenderDataIsWaiting);
-            setSecurityCodeValue('securityCode', data.securityCode);
-            setIsInputBlocked(true);
-            return data
-        } : null);
-
-        return res;
-    };
-
-    const refreshByResponse = (data: any) => {
-        const { id } = bartenderDataIsWaiting ? bartenderDataIsWaiting : { id: 0 };
-        
-        if (data.token && Number(id) === Number(data.id) && data.isApproved) { // Aprovou
-            const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-            if (cookieName) {
-                Cookies.set(cookieName, JSON.stringify(data.token), { expires: 1 });
-            }  
-            verifyBartenderToken();
-        } else { // Recusou
-            cancelRequestWait(true);
-        }
-    };
-
-    const verifyBartenderToken = () => {
-        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-        const bartenderToken = Cookies.get(cookieName ? cookieName : '');  
-        if (bartenderToken) {
-            navigate('/myorders');
-        }
-    };
-
-    const deleteCookie = (cookieName: any) => {
-        if (cookieName) {
-            Cookies.remove(cookieName);
-        }
-    };
-
-    const cancelRequestWait = (refresh: boolean = false) => {
-        setIsInputBlocked(false);
-        setSecurityCodeValue('securityCode', "");
-
-        const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-        if (cookieName) {
-          const bartender = Cookies.get(cookieName);
-          
-          if (bartender) {
-            const bartenderObj = JSON.parse(bartender);
-            updateBartender({
-              variables: {
-                input: {
-                  id: bartenderObj.id,
-                  isWaiting: false,
-                  isApproved: false,
-                  token: "",
-                },
-              },
-            });
-          }
-        }
-      
-        deleteCookie(cookieName);
-        refresh && window.location.reload();
-    };
-
-    const validateBartenderCode = (data: BartenderFormData) => {
+    const onSubmit = (data: BartenderFormData) => {
         const { securityCode } = data;
         try {
-            setResMessage('');
             getBartender({
                 variables: { input: { securityCode: securityCode } },
             })
                 .then((res) => {
-                    const data = res?.data?.bartender?.data;
+                    const data = res?.data?.bartender?.data[0];
                     if (data && data !== null && data.id > 0) {
-                        const hasResponse = data.isApproved != null;
-                        
-                        if (!hasResponse && verifyRequstAuthInCookie()) { // Já enviou a solicitação...
-                            setLoading(false);
-                            return;
-                        }        
-                        
-                        if (!data.isWaiting) {
-                            if (!hasResponse) { // Enviou a solicitação
-                                updateBartender({ variables: {
-                                    input: {
-                                        id: data.id, 
-                                        isWaiting: true,
-                                        token: data.token
-                                    },
-                                }, });
-                
-                                const cookieName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_REQUEST;
-                                if (cookieName) {
-                                    Cookies.set(cookieName, JSON.stringify(data), { expires: 0.0416667 }); // 1 hora
-                                }
-                                verifyRequstAuthInCookie();
-                
-                            } else { // Recebeu resposta da solicitação
-                                refreshByResponse(data);
-                            }
-                        }
-                    } else if (!verifyRequstAuthInCookie()) {
-                        setIsInputBlocked(false);
-                        setSecurityCodeValue('securityCode', "");
+                        setisWaiting(true);
                     }
-                    
-                    if (data && res?.data?.bartender?.message !== null) {
-                        setResMessage(res?.data?.bartender?.message);
-                    };
                 });
         } catch (error) {
             console.error("Erro ao buscar o garçom:", error);
         }
     };
 
+    const cancelRequest = async () => {
+        const token = Cookies.get(process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME ?? "");
+        const bartender = await getBartender({
+            variables: { input: { token } },
+        });
+
+        cancelAuthBartenderRequest({
+            variables: {
+                input: {
+                    bartenderId: Number(bartender.data.bartender.data[0].id),
+                }
+            }
+        })
+            .then(async () => {
+                Cookies.remove(process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME ?? "");
+                setisWaiting(false);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
+
     useEffect(() => {
-        verifyBartenderToken();
-    });
-    loading && setLoading(false);
+        const token = Cookies.get(process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME ?? "");
+        
+        if (token) {
+            setisWaiting(!!token);
+            getBartender({
+                variables: { input: { token } },
+            })
+                .then((res) => {
+                    const data = res?.data?.bartender?.data[0];
+                    if (data && data !== null && data.id > 0) {
+                        setSecurityCodeValue("securityCode", data.securityCode?.toString() ?? "");
+                    }
+                });
+        }
+    }, []);
     
     return (
         <>
-            { loading 
-            ? ( <Loading title="Aguarde, carregando..." /> ) 
-            : (
-                <>
-                    <Helmet>
-                        <title>{pageTitle}</title>
-                    </Helmet>
-                    <div className='main-content'>
-                        <Header />
-                        <form className="bartender-container" onSubmit={handleSubmit(validateBartenderCode)}>
-                            <label className='label-input'>Seu código de segurança:</label>
-                            <input
-                                className='input'
-                                type="text"
-                                aria-label="securityCode input"
-                                placeholder="Código de garçom"
-                                {...register('securityCode')}
-                                disabled={isInputBlocked}
-                            />
-                            {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
-                            {resMessage !== '' && <span className='error-input'>{resMessage}</span>}
-                            { bartenderDataIsWaiting
-                            ? (
-                                <>
-                                    <label className='label-input'>Aguardando aprovação...</label>
-                                    <button onClick={() => cancelRequestWait(true)} className='button' type="button">Cancelar</button>
-                                </>
-                            ) 
-                            : (<button className='button' type="submit">Enviar</button>)}
-                        </form>
-                    </div>
-                </>
-            )}
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
+            <div className='main-content'>
+                <Header />
+                <form className="bartender-container" onSubmit={handleSubmit(onSubmit)}>
+                    <label className='label-input'>Seu código de segurança:</label>
+                    <input
+                        className='input'
+                        type="text"
+                        aria-label="securityCode input"
+                        placeholder="Código de garçom"
+                        {...register('securityCode')}
+                        disabled={isWaiting}
+                    />
+                    {errors.securityCode && <span className='error-input'>{errors.securityCode.message}</span>}
+                    { isWaiting
+                    ? (
+                        <>
+                            <label className='label-input'>Aguardando aprovação...</label>
+                            <button 
+                                className='button'
+                                type="button"
+                                onClick={() => cancelRequest()}
+                            >Cancelar</button>
+                        </>
+                    ) 
+                    : (<button className='button' type="submit">Enviar</button>)}
+                </form>
+            </div>
         </>
     )
 }

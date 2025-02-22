@@ -29,7 +29,7 @@ function App() {
       <Routes>
           <Route 
             path='/admin' element={
-              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME}> 
+              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_USER_TOKEN_NAME}> 
                 <AdminAuthProvider>
                   <Admin /> 
                 </AdminAuthProvider>
@@ -38,7 +38,7 @@ function App() {
           />
           <Route 
             path='/admin/products' element={
-              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME}> 
+              <PrivateRoute redirectTo="/login" cookieName={process.env.REACT_APP_COOKIE_AUTH_USER_TOKEN_NAME}> 
                 <AdminAuthProvider>
                   <Products text='Testando' /> 
                 </AdminAuthProvider>
@@ -47,7 +47,7 @@ function App() {
           />
           <Route 
             path='/myorders' element={
-              <PrivateRoute redirectTo="/" cookieName={process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN}> 
+              <PrivateRoute redirectTo="/" cookieName={process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME}> 
                 <BartenderAuthProvider>
                   <BartenderOrders />
                 </BartenderAuthProvider>

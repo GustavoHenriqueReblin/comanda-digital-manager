@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { Bartender } from "../types/types";
 import { useQuery } from "@apollo/client";
-import { GetBartenderDataByToken } from "../graphql/queries/bartender";
+import { FindBartender } from "../graphql/queries/bartender";
 import Cookies from "js-cookie";
 
 interface BartenderAuthContextProps {
@@ -17,20 +17,22 @@ const BartenderAuthContext = createContext<BartenderAuthContextProps>({
 });
 
 export const BartenderAuthProvider: React.FC<BartenderAuthProviderProps> = ({ children }) => {
-    const cookieBartenderName = process.env.REACT_APP_COOKIE_NAME_BARTENDER_TOKEN;
-    const bartenderToken = Cookies.get(cookieBartenderName ? cookieBartenderName : '');  
-
-    const { data } = useQuery(GetBartenderDataByToken, {
-        variables: { input: { securityCode: "-1", token: bartenderToken } },
+    useQuery(FindBartender, {
+        onError: (error) => {
+            if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+                error.graphQLErrors.forEach(graphQLError => {
+                    if (graphQLError.extensions?.code === 'UNAUTHENTICATED') {
+                        const cookieUserName = process.env.REACT_APP_COOKIE_AUTH_BARTENDER_TOKEN_NAME;
+                        cookieUserName && Cookies.remove(cookieUserName);
+                        window.location.reload();
+                    }
+                });
+            }
+        },
     });
 
-    if (data && (data.getBartenderByToken.data === null || Number(data.getBartenderByToken.data.id) === -1)) {
-        cookieBartenderName && Cookies.remove(cookieBartenderName);
-        window.location.reload();
-    }
-
     return (
-        <BartenderAuthContext.Provider value={{ bartenderData: data?.getBartenderByToken?.data as Bartender }}>
+        <BartenderAuthContext.Provider value={{ bartenderData: null as unknown as Bartender }}>
             { children }
         </BartenderAuthContext.Provider>
     );

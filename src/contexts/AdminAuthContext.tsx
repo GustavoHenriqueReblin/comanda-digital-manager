@@ -43,7 +43,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
             if (error.graphQLErrors && error.graphQLErrors.length > 0) {
                 error.graphQLErrors.forEach(graphQLError => {
                     if (graphQLError.extensions?.code === 'UNAUTHENTICATED') {
-                        const cookieUserName = process.env.REACT_APP_COOKIE_AUTH_TOKEN_NAME;
+                        const cookieUserName = process.env.REACT_APP_COOKIE_AUTH_USER_TOKEN_NAME;
                         cookieUserName && Cookies.remove(cookieUserName);
                         window.location.reload();
                     }

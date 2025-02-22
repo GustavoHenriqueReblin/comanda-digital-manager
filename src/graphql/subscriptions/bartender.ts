@@ -1,27 +1,26 @@
 import { gql } from '@apollo/client';
 
 export const BARTENDER_AUTH_REQUEST = gql`
-  subscription {
+  subscription AuthBartenderRequest {
     authBartenderRequest {
       id
       name
       securityCode
-      isWaiting
-      isApproved
       token
     }
   }
 `;
 
 export const BARTENDER_AUTH_RESPONSE = gql`
-  subscription {
+  subscription AuthBartenderResponse {
     authBartenderResponse {
-      id
-      isApproved
-      isWaiting
-      name
-      securityCode
-      token
+      data {
+        id
+        name
+        securityCode
+        token
+      }
+      authRequestStatus
     }
   }
 `;

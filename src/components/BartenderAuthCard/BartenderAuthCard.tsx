@@ -1,9 +1,10 @@
 import './bartenderAuthCard.scss';
 import React from "react";
+import { Bartender } from '../../types/types';
 
 interface BartenderAuthCardProps {
-    bartender: any;
-    sendResponseAuthReq: (bartender: any, approved: boolean) => void
+    bartender: Bartender;
+    sendResponseAuthReq: (bartender: Bartender, approved: boolean) => void
 };
 
 function BartenderAuthCard({ bartender, sendResponseAuthReq }: BartenderAuthCardProps) {
