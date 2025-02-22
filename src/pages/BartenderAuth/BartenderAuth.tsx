@@ -3,7 +3,7 @@ import './bartenderAuth.scss';
 
 import Header from '../../components/Header/Header';
 import { routes } from "../../types/types";
-import { FindBartender } from "../../graphql/queries/bartender";
+import { BartenderLogin, FindBartender } from "../../graphql/queries/bartender";
 import { CancelAuthBartenderRequest } from "../../graphql/mutations/bartender";
 
 import React, { useEffect, useState } from "react";
@@ -31,6 +31,7 @@ function BartenderAuth() {
 
     const [isWaiting, setisWaiting] = useState<boolean>(false);
     const [getBartender] = useLazyQuery(FindBartender, {fetchPolicy: 'network-only'});
+    const [bartenderLogin] = useLazyQuery(BartenderLogin, {fetchPolicy: 'network-only'});
     
     useSubscription(BARTENDER_AUTH_RESPONSE, {
         onSubscriptionData: (res) => {
@@ -52,11 +53,11 @@ function BartenderAuth() {
     const onSubmit = (data: BartenderFormData) => {
         const { securityCode } = data;
         try {
-            getBartender({
+            bartenderLogin({
                 variables: { input: { securityCode: securityCode } },
             })
                 .then((res) => {
-                    const data = res?.data?.bartender?.data[0];
+                    const data = res?.data?.bartenderLogin?.data[0];
                     if (data && data !== null && data.id > 0) {
                         setisWaiting(true);
                     }
